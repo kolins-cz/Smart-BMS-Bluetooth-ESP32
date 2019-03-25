@@ -6,8 +6,7 @@ Tested with original BLE module provided. Might work with generic BLE module whe
 Needs ESP32 and graphic display.
 Tested on TTGO TS https://github.com/LilyGO/TTGO-TS
 
-(c) Miroslav Kolinsky 2019
-https://www.kolins.cz
+(c) Miroslav Kolinsky 2019  https://www.kolins.cz
 
 thanks to Petr Jenik for big parts of code
 thanks to Milan Petrzilka

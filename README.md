@@ -17,3 +17,6 @@ known bugs:
 * GUI needs to be done
 
 Work in progress...
+
+![Image](1.jpg)
+![Image](2.jpg)

@@ -1,0 +1,24 @@
+{
+    "configurations": [
+        {
+            "name": "Win32",
+            "includePath": [
+                "C:\\d_drive\\private\\work\\arduino-1.8.8\\portable\\packages\\esp32\\tools\\**",
+                "C:\\d_drive\\private\\work\\arduino-1.8.8\\portable\\packages\\esp32\\hardware\\esp32\\1.0.1\\**",
+                "${workspaceFolder}/**",
+                "D:\\private\\work\\arduino-1.8.8\\portable\\sketchbook\\libraries\\**",
+                "D:\\private\\work\\arduino-1.8.8\\portable\\packages\\esp32\\hardware\\esp32\\**",
+                "D:\\private\\work\\arduino-1.8.8\\portable\\packages\\esp32\\tools\\**",
+                "D:\\private\\work\\arduino-1.8.8\\portable\\sketchbook\\libraries\\**"
+            ],
+            "defines": [
+                "_DEBUG",
+                "UNICODE",
+                "_UNICODE"
+            ],
+            "intelliSenseMode": "msvc-x64",
+            "forcedInclude": []
+        }
+    ],
+    "version": 4
+}

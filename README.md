@@ -11,6 +11,8 @@ Tested on TTGO TS https://github.com/LilyGO/TTGO-TS
 thanks to Petr Jenik for big parts of code  
 thanks to Milan Petrzilka  
 
+heavily inspired by https://github.com/bres55/Smart-BMS-arduino-Reader  
+
 known bugs:
 * if BLE server is not available during startup, program hangs
 * reconnection sort of works, sometimes ESP reboots

@@ -22,7 +22,7 @@ known bugs:
 
 //#define TRACE commSerial.println(__FUNCTION__)
 #define TRACE
-#define SIMULATION
+//#define SIMULATION
 #include <Arduino.h>
 #include "BLEDevice.h"
 //#include "BLEScan.h"

@@ -14,6 +14,7 @@ void bmsFakeInfo3()
         //packBasicInfo.BalanceCodeLow=???;
         //packBasicInfo.BalanceCodeHigh=???;
         //packBasicInfo.MosfetStatus=???;
+        lcdConnected(); //clear screen 
     }
     else
     {

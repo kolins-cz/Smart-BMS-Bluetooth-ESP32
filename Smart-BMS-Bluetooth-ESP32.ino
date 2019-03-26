@@ -22,13 +22,14 @@ known bugs:
 
 //#define TRACE commSerial.println(__FUNCTION__)
 #define TRACE
-//#define SIMULATION
+#define SIMULATION
 #include <Arduino.h>
 #include "BLEDevice.h"
 //#include "BLEScan.h"
 #include "mydatatypes.h"
 #include <SPI.h>
 #include <TFT_eSPI.h>
+#include <Adafruit_NeoPixel.h>
 
 HardwareSerial commSerial(0);
 HardwareSerial bmsSerial(1);
@@ -58,6 +59,7 @@ void setup()
 	commSerial.begin(115200, SERIAL_8N1, 3, 1);
 	bmsSerial.begin(9600, SERIAL_8N1, 21, 22);
 	commSerial.println("Starting Arduino BLE Client application...");
+	stripStartup();
 
 	lcdStartup();
 #ifndef SIMULATION
@@ -101,6 +103,9 @@ void loop()
 #ifdef SIMULATION
 	bmsWorkerSimulation();
 #endif
+
+
+stripTest;
 }
 
 void bmsWorker()

@@ -1,7 +1,6 @@
 TFT_eSPI tft = TFT_eSPI();
 
 
-
 void showInfoLcd()
 {
     TRACE;

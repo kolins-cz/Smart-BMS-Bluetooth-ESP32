@@ -30,6 +30,8 @@ known bugs:
 #include <SPI.h>
 #include <TFT_eSPI.h>
 #include <Adafruit_NeoPixel.h>
+#include <U8g2lib.h>
+#include <Wire.h>
 
 HardwareSerial commSerial(0);
 HardwareSerial bmsSerial(1);
@@ -60,7 +62,7 @@ void setup()
 	bmsSerial.begin(9600, SERIAL_8N1, 21, 22);
 	commSerial.println("Starting Arduino BLE Client application...");
 	stripStartup();
-
+	oled_startup();
 	lcdStartup();
 #ifndef SIMULATION
 	bleStartup();
@@ -141,6 +143,7 @@ TRACE;
 	{ 
 		previousMillis = currentMillis;
 		showInfoLcd();
+		showInfoOled();
 		if (toggle) //alternate info3 and info4
 		{
 			bmsFakeInfo3();

@@ -33,6 +33,7 @@ known bugs:
 #include <U8g2lib.h>
 #include <Wire.h>
 
+
 HardwareSerial commSerial(0);
 HardwareSerial bmsSerial(1);
 

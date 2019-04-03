@@ -1,0 +1,6 @@
+{
+    "files.associations": {
+        "system_error": "cpp",
+        "type_traits": "cpp"
+    }
+}

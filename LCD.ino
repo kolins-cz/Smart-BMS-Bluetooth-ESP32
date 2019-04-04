@@ -1,5 +1,7 @@
-TFT_eSPI tft = TFT_eSPI();
+//lcd 128 x 160 px
 
+#define LCDCONSTRUCTOR TFT_eSPI
+LCDCONSTRUCTOR tft = TFT_eSPI();
 
 void showInfoLcd()
 {
@@ -17,15 +19,15 @@ void showInfoLcd()
     tft.print(packBasicInfo.Volts);
     tft.print("V");
     tft.println();
-
+    tft.setTextColor(TFT_BLUE, TFT_BLACK);
     tft.print(packBasicInfo.Amps);
     tft.print("A");
     tft.println();
-
+    tft.setTextColor(TFT_RED, TFT_BLACK);
     tft.print(packBasicInfo.CapacityRemainAh);
     tft.print("Ah");
     tft.println();
-
+    tft.setTextColor(TFT_WHITE, TFT_BLACK);
     tft.print(packBasicInfo.CapacityRemainPercent);
     tft.print("%");
     tft.println();
@@ -36,7 +38,19 @@ void showInfoLcd()
     tft.print(packBasicInfo.Temp1);
     tft.print("C");
     tft.println();
+    //------------draw little battery symbols---------
+    for (uint8_t i = 0; i < 12; i++)
+    {
+        //       (uint8_t origin_x, uint8_t origin_y, uint8_t width, uint8_t height, float value, float valueMin, float valueMax, LCDCONSTRUCTOR &refLCD)
+        lcdBargraphVertical(i * 10 + 4, 108, 8, 20, packCellInfo.CellVolt[i], c_cellAbsMin, c_cellAbsMax, packCellInfo.CellColor[i], tft); //packCellInfo.CellVolt[0]
+    }
 
+    //------------draw testing rectagle---------
+
+    tft.fillRect(100, 10, 10, 10, packCellInfo.CellColor[0]);
+
+    //-------------print cell voltges--------
+    /*
     for (byte i = 1; i <= packCellInfo.NumOfCells; i++)
     {
         tft.setTextColor(TFT_WHITE, TFT_BLACK);
@@ -62,6 +76,7 @@ void showInfoLcd()
             tft.println();
         }
     }
+*/
 }
 
 void lcdStartup()
@@ -90,7 +105,6 @@ void lcdDisconnect()
     tft.println("reconnecting....");
     tft.println("(it may take a while)");
 }
-
 
 void lcdConnected()
 {
@@ -141,4 +155,47 @@ void lcdConnectingStatus(uint8_t state)
 }
 void lcdExample()
 {
+}
+
+void lcdBargraphVertical(uint8_t origin_x, uint8_t origin_y, uint8_t width, uint8_t height, float value, float valueMin, float valueMax, uint32_t insideColor, LCDCONSTRUCTOR &refLCD)
+{
+    const uint8_t spacing = 2;
+    if (value < valueMin)
+    {
+        value = valueMin;
+    }
+    if (value > valueMax)
+    {
+        value = valueMax;
+    }
+
+    uint8_t box_origin_x = origin_x + spacing;
+    uint8_t box_origin_y = origin_y + spacing;
+    uint8_t box_width = width - spacing * 2;
+    uint8_t box_min_height = 0;
+    uint8_t box_max_height = height - spacing;
+
+    uint8_t nipple_origin_x = box_origin_x;
+    uint8_t nipple_origin_y = origin_y - spacing;
+    uint8_t nipple_width = box_width;
+    uint8_t nipple_height = spacing;
+
+    refLCD.fillRect(box_origin_x, box_origin_y, box_width, box_max_height, TFT_BLACK); // "delete" old battery
+
+    // uint8_t box_height = map((value * 1000), (valueMin * 1000), (valueMax * 1000), box_min_height, box_max_height); //this doesnt not work. it writes to bad memory place breaking cellavg
+    //fixed by this hack
+
+    value = value * 1000;
+    valueMin = valueMin * 1000;
+    valueMax = valueMax * 1000;
+
+    uint8_t box_height = round(map(value, valueMax, valueMin, box_min_height, box_max_height));
+    box_origin_y = box_origin_y + box_height;
+    box_height = box_max_height - box_height - spacing;
+
+    //
+    refLCD.drawRect(origin_x, origin_y, width, height, TFT_WHITE); //(u8g2_uint_t x, u8g2_uint_t y, u8g2_uint_t w, u8g2_uint_t h)
+    refLCD.fillRect(nipple_origin_x, nipple_origin_y, nipple_width, nipple_height, TFT_WHITE);
+
+    refLCD.fillRect(box_origin_x, box_origin_y, box_width, box_height, insideColor);
 }

@@ -39,6 +39,7 @@ typedef struct
 	float CellMin;
 	float CellDiff; // difference between highest and lowest
 	float CellAvg;
+	uint32_t CellColor[15];
 } packCellInfoStruct;
 
 
@@ -57,7 +58,8 @@ struct  packEepromStruct
 };
 
 
-
+const float c_cellAbsMin = 2.7;
+const float c_cellAbsMax = 4.2;
 
 
 

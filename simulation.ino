@@ -14,12 +14,12 @@ void bmsFakeInfo3()
         //packBasicInfo.BalanceCodeLow=???;
         //packBasicInfo.BalanceCodeHigh=???;
         //packBasicInfo.MosfetStatus=???;
-        lcdConnected(); //clear screen 
+        lcdConnected(); //clear screen
     }
     else
     {
         packBasicInfo.Volts = packBasicInfo.Volts + 0.01;
-        commSerial.println(packBasicInfo.Volts);
+        //commSerial.println(packBasicInfo.Volts);
     }
 }
 
@@ -36,7 +36,8 @@ void bmsFakeInfo4()
 
     for (size_t i = 0; i < 12; i++)
     {
-        randNum = random(1000) / 1000.0000 + 3.0000;
+        //randNum = random(1000) / 1000.0000 + 3.0000;
+        randNum = random(c_cellAbsMax * 1000 - c_cellAbsMin * 1000) / 1000.0 + c_cellAbsMin;
         packCellInfo.CellVolt[i] = randNum;
 
         _cellSum += packCellInfo.CellVolt[i];
@@ -48,6 +49,11 @@ void bmsFakeInfo4()
         {
             _cellMin = packCellInfo.CellVolt[i];
         }
+        packCellInfo.CellColor[i] = getPixelColorHsv(mapHueFloat(packCellInfo.CellVolt[i], c_cellAbsMin, c_cellAbsMax), 255, 255);
+        // commSerial.print("cell number ");
+        // commSerial.print(i + 1);
+        // commSerial.print(" color RGB:");
+        // commSerial.println(packCellInfo.CellColor[i], HEX);
     }
     packCellInfo.CellMin = _cellMin;
     packCellInfo.CellMax = _cellMax;

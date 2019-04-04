@@ -29,7 +29,8 @@ known bugs:
 #include "mydatatypes.h"
 #include <SPI.h>
 #include <TFT_eSPI.h>
-#include <Adafruit_NeoPixel.h>
+//#include <Adafruit_NeoPixel.h>
+#include <NeoPixelBus.h>
 #include <U8g2lib.h>
 #include <Wire.h>
 
@@ -108,7 +109,7 @@ void loop()
 #endif
 
 
-stripTest;
+
 }
 
 void bmsWorker()
@@ -119,6 +120,7 @@ TRACE;
 	{
 		previousMillis = currentMillis;
 		showInfoLcd();
+		
 		if (toggle) //alternate info3 and info4
 		{
 			bmsGetInfo3();
@@ -145,6 +147,7 @@ TRACE;
 		previousMillis = currentMillis;
 		showInfoLcd();
 		showInfoOled();
+		stripTest();
 		if (toggle) //alternate info3 and info4
 		{
 			bmsFakeInfo3();
@@ -154,7 +157,7 @@ TRACE;
 		else
 		{
 			bmsFakeInfo4();
-			//showCellInfo();
+			showCellInfo();
 			
 		}
 		toggle = !toggle;

@@ -88,6 +88,10 @@ bool processCellInfo(packCellInfoStruct *output, byte *data, unsigned int dataLe
         {
             _cellMin = output->CellVolt[i];
         }
+
+        output->CellColor[i] = getPixelColorHsv(mapHueFloat(output->CellVolt[i], c_cellAbsMin, c_cellAbsMax), 255, 255);
+
+        //getPixelColorHsv(mapHue(mySpectrum, 0, 100), c_sat, c_val))
     }
     output->CellMin = _cellMin;
     output->CellMax = _cellMax;

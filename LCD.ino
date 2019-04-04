@@ -197,5 +197,5 @@ void lcdBargraphVertical(uint8_t origin_x, uint8_t origin_y, uint8_t width, uint
     refLCD.drawRect(origin_x, origin_y, width, height, TFT_WHITE); //(u8g2_uint_t x, u8g2_uint_t y, u8g2_uint_t w, u8g2_uint_t h)
     refLCD.fillRect(nipple_origin_x, nipple_origin_y, nipple_width, nipple_height, TFT_WHITE);
 
-    refLCD.fillRect(box_origin_x, box_origin_y, box_width, box_height, insideColor);
+    refLCD.fillRect(box_origin_x, box_origin_y, box_width, box_height, color24to16(insideColor));
 }

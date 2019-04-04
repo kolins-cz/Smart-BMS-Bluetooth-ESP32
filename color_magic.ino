@@ -1,4 +1,12 @@
 
+
+unsigned int color24to16(unsigned long rgb){ //convert 24 bit RGB to 16bit 5:6:5 RGB
+ 
+  return(((rgb&0xf80000)>>8)|((rgb&0xfc00)>>5)|((rgb&0xf8)>>3));
+}
+
+
+
 uint16_t mapHue(uint8_t input, uint8_t min, uint8_t max) //maps hue from 0 to max to 330 to 120 like in betaflight. hue can be 0-359 hence the condidion used
 {
     int16_t temp = map(input, min, max, 1, 150);

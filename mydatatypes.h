@@ -69,6 +69,11 @@ const float c_cellAbsMax = 4.2;
 
 #endif /* mydatatypes_H_ */
 
+// Color definitions for 64k color mode
+// Bits 0..4 -> Blue 0..4
+// Bits 5..10 -> Green 0..5
+// Bits 11..15 -> Red 0..4
+
 #ifdef LCDDRIVER_TFT_eSPI
 #define TFT_BLACK       0x0000      /*   0,   0,   0 */
 #define TFT_NAVY        0x000F      /*   0,   0, 128 */

@@ -33,12 +33,12 @@ void showInfoOled()
     oled1.setFont(u8g_font_10x20);
     oled1.drawStr(0, 20, "OLED 1");
 
-    dtostrf(packBasicInfo.Volts, 5, 2, buffer);
+    dtostrf((float)packBasicInfo.Volts / 1000, 5, 2, buffer);
 
     oled1.drawStr(0, 40, buffer);
     oled1.drawStr(50, 40, "V");
 
-    itoa(yy, buffer, 10);
+    itoa(yy, buffer, 10); //number to string
     oled1.drawStr(0, 60, buffer);
     oled1.sendBuffer();
 
@@ -46,7 +46,7 @@ void showInfoOled()
     //oled2.setFont(u8g_font_6x10);
     for (uint8_t i = 0; i < 12; i++)
     {
-        oledBargraphVertical(i * 10, 36, 8, 28, packCellInfo.CellVolt[i], 2.7, 4.2, oled2); //packCellInfo.CellVolt[0]
+        oledBargraphVertical(i * 10, 36, 8, 28, packCellInfo.CellVolt[i], c_cellAbsMin, c_cellAbsMax, oled2); //packCellInfo.CellVolt[0]
     }
 
     //oled2.setFont(u8g_font_10x20);
@@ -57,7 +57,7 @@ void showInfoOled()
     oled2.sendBuffer();
 }
 
-void oledBargraphVertical(uint8_t origin_x, uint8_t origin_y, uint8_t width, uint8_t height, float value, float valueMin, float valueMax, OLEDCONSTRUCTOR &refOled)
+void oledBargraphVertical(uint8_t origin_x, uint8_t origin_y, uint8_t width, uint8_t height, uint16_t value, uint16_t valueMin, uint16_t valueMax, OLEDCONSTRUCTOR &refOled)
 {
     const uint8_t spacing = 2;
     if (value < valueMin)
@@ -72,7 +72,7 @@ void oledBargraphVertical(uint8_t origin_x, uint8_t origin_y, uint8_t width, uin
     uint8_t box_origin_x = origin_x + spacing;
     uint8_t box_origin_y = origin_y + spacing;
     uint8_t box_width = width - spacing * 2;
-    uint8_t box_min_height = 0;
+    uint8_t box_min_height = 1;
     uint8_t box_max_height = height - spacing;
 
     uint8_t nipple_origin_x = box_origin_x;
@@ -80,16 +80,13 @@ void oledBargraphVertical(uint8_t origin_x, uint8_t origin_y, uint8_t width, uin
     uint8_t nipple_width = box_width;
     uint8_t nipple_height = spacing;
 
-    // uint8_t box_height = map((value * 1000), (valueMin * 1000), (valueMax * 1000), box_min_height, box_max_height); //this doesnt not work. it writes to bad memory place breaking cellavg
-    //fixed by this hack
-
-    value = value * 1000;
-    valueMin = valueMin * 1000;
-    valueMax = valueMax * 1000;
-
-    uint8_t box_height = round(map(value, valueMax, valueMin, box_min_height, box_max_height));
+    int16_t box_height = map(value, valueMax, valueMin, box_min_height, box_max_height);
     box_origin_y = box_origin_y + box_height;
     box_height = box_max_height - box_height - spacing;
+    if (box_height < 0) //ugly hack
+    {
+        box_height = 0;
+    }
 
     refOled.drawFrame(origin_x, origin_y, width, height); //(u8g2_uint_t x, u8g2_uint_t y, u8g2_uint_t w, u8g2_uint_t h)
     refOled.drawBox(box_origin_x, box_origin_y, box_width, box_height);

@@ -20,12 +20,12 @@ typedef struct
 
 typedef struct
 {
-	float Volts;
-	float Amps;
-	float CapacityRemainAh;
-	int CapacityRemainPercent; //in %
-	float Temp1;
-	float Temp2;
+	uint16_t Volts; // unit 1mV
+	int32_t Amps; // unit 1mA
+	uint16_t CapacityRemainAh;
+	uint8_t CapacityRemainPercent; //unit 1%
+	uint16_t Temp1;  //unit 0.1C
+	uint16_t Temp2;  //unit 0.1C
 	uint16_t BalanceCodeLow;
 	uint16_t BalanceCodeHigh;
 	uint8_t MosfetStatus;
@@ -33,35 +33,37 @@ typedef struct
 
 typedef struct
 {
-	byte NumOfCells;
-	float CellVolt[15]; //cell 1 has index 0 :-/
-	float CellMax;
-	float CellMin;
-	float CellDiff; // difference between highest and lowest
-	float CellAvg;
+	uint8_t NumOfCells;
+	uint16_t CellVolt[15]; //cell 1 has index 0 :-/
+	uint16_t CellMax;
+	uint16_t CellMin;
+	uint16_t CellDiff; // difference between highest and lowest
+	uint16_t CellAvg;
+	uint16_t CellMedian;
 	uint32_t CellColor[15];
+	uint32_t CellColorDisbalance[15]; // green cell == median, red/violet cell => median + c_cellMaxDisbalance
 } packCellInfoStruct;
 
 
 struct  packEepromStruct
 {
-	float POVP; 
-	float PUVP;
-	float COVP;
-	float CUVP;
-	float POVPRelease;
-	float PUVPRelease;
-	float COVPRelease;
-	float CUVPRelease;
+	uint16_t POVP; 
+	uint16_t PUVP;
+	uint16_t COVP;
+	uint16_t CUVP;
+	uint16_t POVPRelease;
+	uint16_t PUVPRelease;
+	uint16_t COVPRelease;
+	uint16_t CUVPRelease;
 	uint16_t CHGOC;
 	uint16_t DSGOC;
 };
 
 
-const float c_cellAbsMin = 2.7;
-const float c_cellAbsMax = 4.2;
+const uint16_t c_cellAbsMin = 2700;
+const uint16_t c_cellAbsMax = 4200;
 
-
+const uint16_t c_cellMaxDisbalance = 200; // cell different by this value from cell median is getting violet (worst) color
 
 
 

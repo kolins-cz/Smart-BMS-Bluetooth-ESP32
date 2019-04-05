@@ -1,15 +1,14 @@
+unsigned int color24to16(unsigned long rgb)
+{ //convert 24 bit RGB to 16bit 5:6:5 RGB
 
-
-unsigned int color24to16(unsigned long rgb){ //convert 24 bit RGB to 16bit 5:6:5 RGB
- 
-  return(((rgb&0xf80000)>>8)|((rgb&0xfc00)>>5)|((rgb&0xf8)>>3));
+    return (((rgb & 0xf80000) >> 8) | ((rgb & 0xfc00) >> 5) | ((rgb & 0xf8) >> 3));
 }
 
 
-
-uint16_t mapHue(uint8_t input, uint8_t min, uint8_t max) //maps hue from 0 to max to 330 to 120 like in betaflight. hue can be 0-359 hence the condidion used
-{
-    int16_t temp = map(input, min, max, 1, 150);
+uint16_t mapHue(uint16_t input, uint16_t min, uint16_t max) 
+{//maps hue from 0 to max to 330 to 120 like in betaflight. hue can be 0-359 hence the condidion used
+    uint16_t temp = map(input, min, max, 1, 150);
+    
     if (temp < 30)
     {
         return 330 + temp;
@@ -20,22 +19,6 @@ uint16_t mapHue(uint8_t input, uint8_t min, uint8_t max) //maps hue from 0 to ma
     }
 }
 
-
-uint16_t mapHueFloat(float input, float min, float max) //maps hue from 0 to max to 330 to 120 like in betaflight. hue can be 0-359 hence the condidion used
-{
-    input = input * 1000;
-    min = min * 1000;
-    max = max * 1000;
-    int16_t temp = map(input, min, max, 1, 150);
-    if (temp < 30)
-    {
-        return 330 + temp;
-    }
-    else
-    {
-        return temp - 30;
-    }
-}
 
 
 const byte dim_curve[] = {
@@ -60,6 +43,7 @@ const byte dim_curve[] = {
 // downloaded from here
 // https://www.kasperkamperman.com/blog/arduino/arduino-programming-hsb-to-rgb/
 // hue 0-359, sat 0-255, val 0-255
+//returns 24bpp color information
 uint32_t getPixelColorHsv(uint16_t hue, uint8_t sat, uint8_t val)
 {
     val = dim_curve[val];

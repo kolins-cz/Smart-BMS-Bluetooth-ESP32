@@ -30,10 +30,9 @@ known bugs:
 #include <SPI.h>
 #include <TFT_eSPI.h>
 //#include <Adafruit_NeoPixel.h>
-#include <NeoPixelBus.h>
+#include <NeoPixelBrightnessBus.h>
 #include <U8g2lib.h>
 #include <Wire.h>
-
 
 HardwareSerial commSerial(0);
 HardwareSerial bmsSerial(1);
@@ -107,20 +106,17 @@ void loop()
 #ifdef SIMULATION
 	bmsWorkerSimulation();
 #endif
-
-
-
 }
 
 void bmsWorker()
 {
-TRACE;
+	TRACE;
 	unsigned long currentMillis = millis();
 	if ((currentMillis - previousMillis >= interval || newPacketReceived)) //every time period or when packet is received
 	{
 		previousMillis = currentMillis;
 		showInfoLcd();
-		
+
 		if (toggle) //alternate info3 and info4
 		{
 			bmsGetInfo3();
@@ -137,13 +133,12 @@ TRACE;
 	}
 }
 
-
 void bmsWorkerSimulation()
 {
-TRACE;
+	TRACE;
 	unsigned long currentMillis = millis();
-	if ((currentMillis - previousMillis >= 250)) 
-	{ 
+	if ((currentMillis - previousMillis >= 125))
+	{
 		previousMillis = currentMillis;
 		showInfoLcd();
 		showInfoOled();
@@ -158,9 +153,7 @@ TRACE;
 		{
 			bmsFakeInfo4();
 			showCellInfo();
-			
 		}
 		toggle = !toggle;
 	}
-
 }

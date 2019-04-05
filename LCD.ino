@@ -16,15 +16,15 @@ void showInfoLcd()
 
     tft.setTextSize(2);
 
-    tft.print(packBasicInfo.Volts);
+    tft.print((float)packBasicInfo.Volts / 1000);
     tft.print("V");
     tft.println();
     tft.setTextColor(TFT_BLUE, TFT_BLACK);
-    tft.print(packBasicInfo.Amps);
+    tft.print((float)packBasicInfo.Amps / 1000);
     tft.print("A");
     tft.println();
     tft.setTextColor(TFT_RED, TFT_BLACK);
-    tft.print(packBasicInfo.CapacityRemainAh);
+    tft.print((float)packBasicInfo.CapacityRemainAh / 1000);
     tft.print("Ah");
     tft.println();
     tft.setTextColor(TFT_WHITE, TFT_BLACK);
@@ -35,19 +35,19 @@ void showInfoLcd()
     tft.setTextSize(1);
     tft.setTextColor(TFT_YELLOW, TFT_BLACK);
 
-    tft.print(packBasicInfo.Temp1);
+    tft.print((float)packBasicInfo.Temp1 / 10);
     tft.print("C");
     tft.println();
     //------------draw little battery symbols---------
     for (uint8_t i = 0; i < 12; i++)
     {
         //       (uint8_t origin_x, uint8_t origin_y, uint8_t width, uint8_t height, float value, float valueMin, float valueMax, LCDCONSTRUCTOR &refLCD)
-        lcdBargraphVertical(i * 10 + 4, 108, 8, 20, packCellInfo.CellVolt[i], c_cellAbsMin, c_cellAbsMax, packCellInfo.CellColor[i], tft); //packCellInfo.CellVolt[0]
+        lcdBargraphVertical(i * 10 + 4, 108, 8, 20, packCellInfo.CellVolt[i], c_cellAbsMin, c_cellAbsMax, packCellInfo.CellColor[i], packCellInfo.CellColorDisbalance[i], tft); //packCellInfo.CellVolt[0]
     }
 
     //------------draw testing rectagle---------
 
-    tft.fillRect(100, 10, 10, 10, packCellInfo.CellColor[0]);
+    tft.fillRect(100, 10, 10, 10, color24to16(packCellInfo.CellColor[0]));
 
     //-------------print cell voltges--------
     /*
@@ -157,7 +157,7 @@ void lcdExample()
 {
 }
 
-void lcdBargraphVertical(uint8_t origin_x, uint8_t origin_y, uint8_t width, uint8_t height, float value, float valueMin, float valueMax, uint32_t insideColor, LCDCONSTRUCTOR &refLCD)
+void lcdBargraphVertical(uint8_t origin_x, uint8_t origin_y, uint8_t width, uint8_t height, uint16_t value, uint16_t valueMin, uint16_t valueMax, uint32_t insideColor, uint32_t outsideColor, LCDCONSTRUCTOR &refLCD)
 {
     const uint8_t spacing = 2;
     if (value < valueMin)
@@ -172,7 +172,7 @@ void lcdBargraphVertical(uint8_t origin_x, uint8_t origin_y, uint8_t width, uint
     uint8_t box_origin_x = origin_x + spacing;
     uint8_t box_origin_y = origin_y + spacing;
     uint8_t box_width = width - spacing * 2;
-    uint8_t box_min_height = 0;
+    uint8_t box_min_height = 1;
     uint8_t box_max_height = height - spacing;
 
     uint8_t nipple_origin_x = box_origin_x;
@@ -182,20 +182,16 @@ void lcdBargraphVertical(uint8_t origin_x, uint8_t origin_y, uint8_t width, uint
 
     refLCD.fillRect(box_origin_x, box_origin_y, box_width, box_max_height, TFT_BLACK); // "delete" old battery
 
-    // uint8_t box_height = map((value * 1000), (valueMin * 1000), (valueMax * 1000), box_min_height, box_max_height); //this doesnt not work. it writes to bad memory place breaking cellavg
-    //fixed by this hack
-
-    value = value * 1000;
-    valueMin = valueMin * 1000;
-    valueMax = valueMax * 1000;
-
-    uint8_t box_height = round(map(value, valueMax, valueMin, box_min_height, box_max_height));
+    int16_t box_height = map(value, valueMax, valueMin, box_min_height, box_max_height);
     box_origin_y = box_origin_y + box_height;
     box_height = box_max_height - box_height - spacing;
-
-    //
-    refLCD.drawRect(origin_x, origin_y, width, height, TFT_WHITE); //(u8g2_uint_t x, u8g2_uint_t y, u8g2_uint_t w, u8g2_uint_t h)
-    refLCD.fillRect(nipple_origin_x, nipple_origin_y, nipple_width, nipple_height, TFT_WHITE);
+    if (box_height < 0) //ugly hack
+    {
+        box_height = 0;
+    }
+    outsideColor = 0xFFFFFF;
+    refLCD.drawRect(origin_x, origin_y, width, height, color24to16(outsideColor)); //(u8g2_uint_t x, u8g2_uint_t y, u8g2_uint_t w, u8g2_uint_t h)
+    refLCD.fillRect(nipple_origin_x, nipple_origin_y, nipple_width, nipple_height, color24to16(outsideColor));
 
     refLCD.fillRect(box_origin_x, box_origin_y, box_width, box_height, color24to16(insideColor));
 }

@@ -5,12 +5,12 @@ void bmsFakeInfo3()
     TRACE;
     if (newPacketReceived == true)
     {
-        packBasicInfo.Volts = 48.668;
-        packBasicInfo.Amps = 15.42;
-        packBasicInfo.CapacityRemainAh = 15.9998;
+        packBasicInfo.Volts = 48660;
+        packBasicInfo.Amps = 15420;
+        packBasicInfo.CapacityRemainAh = 15990;
         packBasicInfo.CapacityRemainPercent = 78; //in %
-        packBasicInfo.Temp1 = 35;
-        packBasicInfo.Temp2 = 45;
+        packBasicInfo.Temp1 = 356;
+        packBasicInfo.Temp2 = 452;
         //packBasicInfo.BalanceCodeLow=???;
         //packBasicInfo.BalanceCodeHigh=???;
         //packBasicInfo.MosfetStatus=???;
@@ -18,7 +18,7 @@ void bmsFakeInfo3()
     }
     else
     {
-        packBasicInfo.Volts = packBasicInfo.Volts + 0.01;
+        packBasicInfo.Volts = packBasicInfo.Volts + 10;
         //commSerial.println(packBasicInfo.Volts);
     }
 }
@@ -26,18 +26,18 @@ void bmsFakeInfo3()
 void bmsFakeInfo4()
 {
     TRACE;
-    float _cellSum;
-    float _cellMin = 50.0;
-    float _cellMax = 0;
-    float _cellAvg;
-    float _cellDiff;
-    float randNum;
+    uint16_t _cellSum;
+    uint16_t _cellMin = 5000;
+    uint16_t _cellMax = 0;
+    uint16_t _cellAvg;
+    uint16_t _cellDiff;
+    uint16_t randNum;
     packCellInfo.NumOfCells = 12;
 
     for (size_t i = 0; i < 12; i++)
     {
-        //randNum = random(1000) / 1000.0000 + 3.0000;
-        randNum = random(c_cellAbsMax * 1000 - c_cellAbsMin * 1000) / 1000.0 + c_cellAbsMin;
+
+        randNum = random(c_cellAbsMax - c_cellAbsMin) + c_cellAbsMin;
         packCellInfo.CellVolt[i] = randNum;
 
         _cellSum += packCellInfo.CellVolt[i];
@@ -49,14 +49,51 @@ void bmsFakeInfo4()
         {
             _cellMin = packCellInfo.CellVolt[i];
         }
-        packCellInfo.CellColor[i] = getPixelColorHsv(mapHueFloat(packCellInfo.CellVolt[i], c_cellAbsMin, c_cellAbsMax), 255, 255);
-        // commSerial.print("cell number ");
-        // commSerial.print(i + 1);
-        // commSerial.print(" color RGB:");
-        // commSerial.println(packCellInfo.CellColor[i], HEX);
+        packCellInfo.CellColor[i] = getPixelColorHsv(mapHue(packCellInfo.CellVolt[i], c_cellAbsMin, c_cellAbsMax), 255, 255);
     }
     packCellInfo.CellMin = _cellMin;
     packCellInfo.CellMax = _cellMax;
     packCellInfo.CellDiff = _cellMax - _cellMin; // Resolution 10 mV -> convert to volts
     packCellInfo.CellAvg = _cellSum / packCellInfo.NumOfCells;
+    //----cell median calculation----
+    uint16_t n = packCellInfo.NumOfCells;
+    uint16_t i, j;
+    uint16_t temp;
+    uint16_t x[n];
+
+    for (uint8_t u = 0; u < n; u++)
+    {
+        x[u] = packCellInfo.CellVolt[u];
+    }
+
+    for (i = 1; i <= n; ++i) //sort data
+    {
+        for (j = i + 1; j <= n; ++j)
+        {
+            if (x[i] > x[j])
+            {
+                temp = x[i];
+                x[i] = x[j];
+                x[j] = temp;
+            }
+        }
+    }
+
+    if (n % 2 == 0) //compute median
+    {
+        packCellInfo.CellMedian = (x[n / 2] + x[n / 2 + 1]) / 2;
+    }
+    else
+    {
+        packCellInfo.CellMedian = x[n / 2 + 1];
+    }
+
+    //-----voltage disbalance color calculation
+    // for (uint8_t q = 0; q < packCellInfo.NumOfCells; q++)
+    // {
+    //     uint32_t disbal = abs(packCellInfo.CellMedian - packCellInfo.CellVolt[q]);
+    //     uint32_t disbalMin = packCellInfo.CellMedian - c_cellMaxDisbalance;
+    //     uint32_t disbalMax = packCellInfo.CellMedian - c_cellMaxDisbalance;
+    //     packCellInfo.CellColorDisbalance[q] = getPixelColorHsv(mapHue(disbal, disbalMin, disbalMax), 255, 255);
+    // }
 }

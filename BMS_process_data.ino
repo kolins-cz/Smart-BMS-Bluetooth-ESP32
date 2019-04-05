@@ -51,12 +51,12 @@ bool processBasicInfo(packBasicInfoStruct *output, byte *data, unsigned int data
         return false;
     }
 
-    output->Volts = ((float)two_ints_into16(data[0], data[1])) / 100; // Resolution 10 mV -> convert to volts
-    output->Amps = ((float)two_ints_into16(data[2], data[3])) / 100;  // Resolution 10 mA -> convert to amps
-    output->CapacityRemainAh = ((float)two_ints_into16(data[4], data[5])) / 100;
-    output->CapacityRemainPercent = ((int)data[19]);
-    output->Temp1 = (((float)two_ints_into16(data[23], data[24])) - 2731) / 10;
-    output->Temp2 = (((float)two_ints_into16(data[25], data[26])) - 2731) / 10;
+    output->Volts = ((uint32_t)two_ints_into16(data[0], data[1])) * 10; // Resolution 10 mV -> convert to milivolts   eg 4895 > 48950mV
+    output->Amps = ((int32_t)two_ints_into16(data[2], data[3])) * 10;   // Resolution 10 mA -> convert to miliamps
+    output->CapacityRemainAh = ((uint16_t)two_ints_into16(data[4], data[5])) * 10;
+    output->CapacityRemainPercent = ((uint8_t)data[19]);
+    output->Temp1 = (((uint16_t)two_ints_into16(data[23], data[24])) - 2731);
+    output->Temp2 = (((uint16_t)two_ints_into16(data[25], data[26])) - 2731);
     output->BalanceCodeLow = (two_ints_into16(data[12], data[13]));
     output->BalanceCodeHigh = (two_ints_into16(data[14], data[15]));
     output->MosfetStatus = ((byte)data[20]);
@@ -66,19 +66,20 @@ bool processBasicInfo(packBasicInfoStruct *output, byte *data, unsigned int data
 
 bool processCellInfo(packCellInfoStruct *output, byte *data, unsigned int dataLen)
 {
+
     TRACE;
-    float _cellSum;
-    float _cellMin = 50.0;
-    float _cellMax = 0;
-    float _cellAvg;
-    float _cellDiff;
+    uint16_t _cellSum;
+    uint16_t _cellMin = 5000;
+    uint16_t _cellMax = 0;
+    uint16_t _cellAvg;
+    uint16_t _cellDiff;
 
     output->NumOfCells = dataLen / 2; // Data length * 2 is number of cells !!!!!!
 
     //go trough individual cells
     for (byte i = 0; i < dataLen / 2; i++)
     {
-        output->CellVolt[i] = ((float)two_ints_into16(data[i * 2], data[i * 2 + 1])) / 1000; // Resolution 1 mV -> convert to volts
+        output->CellVolt[i] = ((uint16_t)two_ints_into16(data[i * 2], data[i * 2 + 1])); // Resolution 1 mV
         _cellSum += output->CellVolt[i];
         if (output->CellVolt[i] > _cellMax)
         {
@@ -89,14 +90,45 @@ bool processCellInfo(packCellInfoStruct *output, byte *data, unsigned int dataLe
             _cellMin = output->CellVolt[i];
         }
 
-        output->CellColor[i] = getPixelColorHsv(mapHueFloat(output->CellVolt[i], c_cellAbsMin, c_cellAbsMax), 255, 255);
-
-        //getPixelColorHsv(mapHue(mySpectrum, 0, 100), c_sat, c_val))
+        output->CellColor[i] = getPixelColorHsv(mapHue(output->CellVolt[i], c_cellAbsMin, c_cellAbsMax), 255, 255);
     }
     output->CellMin = _cellMin;
     output->CellMax = _cellMax;
     output->CellDiff = _cellMax - _cellMin; // Resolution 10 mV -> convert to volts
     output->CellAvg = _cellSum / output->NumOfCells;
+
+    //----cell median calculation----
+    uint16_t n = output->NumOfCells;
+    uint16_t i, j;
+    uint16_t temp;
+    uint16_t x[n];
+
+    for (uint8_t u = 0; u < n; u++)
+    {
+        x[u] = output->CellVolt[u];
+    }
+
+    for (i = 1; i <= n; ++i) //sort data
+    {
+        for (j = i + 1; j <= n; ++j)
+        {
+            if (x[i] > x[j])
+            {
+                temp = x[i];
+                x[i] = x[j];
+                x[j] = temp;
+            }
+        }
+    }
+
+    if (n % 2 == 0) //compute median
+    {
+        output->CellMedian = (x[n / 2] + x[n / 2 + 1]) / 2;
+    }
+    else
+    {
+        output->CellMedian = x[n / 2 + 1];
+    }
 
     return true;
 };
@@ -274,12 +306,12 @@ void bmsGetInfo4()
 void showBasicInfo() //debug all data to uart
 {
     TRACE;
-    commSerial.printf("Total voltage: %f\n", packBasicInfo.Volts);
-    commSerial.printf("Amps: %f\n", packBasicInfo.Amps);
-    commSerial.printf("CapacityRemainAh: %f\n", packBasicInfo.CapacityRemainAh);
+    commSerial.printf("Total voltage: %f\n", (float)packBasicInfo.Volts / 1000);
+    commSerial.printf("Amps: %f\n", (float)packBasicInfo.Amps / 1000);
+    commSerial.printf("CapacityRemainAh: %f\n", (float)packBasicInfo.CapacityRemainAh / 1000);
     commSerial.printf("CapacityRemainPercent: %d\n", packBasicInfo.CapacityRemainPercent);
-    commSerial.printf("Temp1: %f\n", packBasicInfo.Temp1);
-    commSerial.printf("Temp2: %f\n", packBasicInfo.Temp2);
+    commSerial.printf("Temp1: %f\n", (float)packBasicInfo.Temp1 / 10);
+    commSerial.printf("Temp2: %f\n", (float)packBasicInfo.Temp2 / 10);
     commSerial.printf("Balance Code Low: 0x%x\n", packBasicInfo.BalanceCodeLow);
     commSerial.printf("Balance Code High: 0x%x\n", packBasicInfo.BalanceCodeHigh);
     commSerial.printf("Mosfet Status: 0x%x\n", packBasicInfo.MosfetStatus);
@@ -292,12 +324,13 @@ void showCellInfo() //debug all data to uart
     for (byte i = 1; i <= packCellInfo.NumOfCells; i++)
     {
         commSerial.printf("Cell no. %u", i);
-        commSerial.printf("   %f\n", packCellInfo.CellVolt[i - 1]);
+        commSerial.printf("   %f\n", (float)packCellInfo.CellVolt[i - 1] / 1000);
     }
-    commSerial.printf("Max cell volt: %f\n", packCellInfo.CellMax);
-    commSerial.printf("Min cell volt: %f\n", packCellInfo.CellMin);
-    commSerial.printf("Difference cell volt: %f\n", packCellInfo.CellDiff);
-    commSerial.printf("Average cell volt: %f\n", packCellInfo.CellAvg);
+    commSerial.printf("Max cell volt: %f\n", (float)packCellInfo.CellMax / 1000);
+    commSerial.printf("Min cell volt: %f\n", (float)packCellInfo.CellMin / 1000);
+    commSerial.printf("Difference cell volt: %f\n", (float)packCellInfo.CellDiff / 1000);
+    commSerial.printf("Average cell volt: %f\n", (float)packCellInfo.CellAvg / 1000);
+    commSerial.printf("Median cell volt: %f\n", (float)packCellInfo.CellMedian / 1000);
     commSerial.println();
 }
 

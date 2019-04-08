@@ -22,14 +22,13 @@ known bugs:
 
 //#define TRACE commSerial.println(__FUNCTION__)
 #define TRACE
-#define SIMULATION
+//#define SIMULATION
 #include <Arduino.h>
 #include "BLEDevice.h"
 //#include "BLEScan.h"
 #include "mydatatypes.h"
 #include <SPI.h>
 #include <TFT_eSPI.h>
-//#include <Adafruit_NeoPixel.h>
 #include <NeoPixelBrightnessBus.h>
 #include <U8g2lib.h>
 #include <Wire.h>
@@ -62,8 +61,8 @@ void setup()
 	commSerial.begin(115200, SERIAL_8N1, 3, 1);
 	bmsSerial.begin(9600, SERIAL_8N1, 21, 22);
 	commSerial.println("Starting Arduino BLE Client application...");
-	stripStartup();
-	oled_startup();
+//	stripStartup();
+//	oled_startup();
 	lcdStartup();
 #ifndef SIMULATION
 	bleStartup();
@@ -152,7 +151,7 @@ void bmsWorkerSimulation()
 		else
 		{
 			bmsFakeInfo4();
-			showCellInfo();
+			//showCellInfo();
 		}
 		toggle = !toggle;
 	}

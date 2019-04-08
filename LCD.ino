@@ -10,50 +10,72 @@ void showInfoLcd()
     //drawRoundRect(int32_t x, int32_t y, int32_t w, int32_t h, int32_t r, uint32_t color)
     //tft.drawRoundRect();
 
-    //tft.fillScreen(TFT_BLACK); // CLEAR
-    tft.setCursor(3, 5);
-    tft.setTextColor(TFT_GREEN, TFT_BLACK);
+    //tft.fillScreen(TFT_BLACK); // CLEAR makes nasty flicker, don't use
+    tft.setCursor(0, 5);
 
     tft.setTextSize(2);
 
+    //---main voltage---
+    tft.setTextColor(TFT_GREEN, TFT_BLACK);
     tft.print((float)packBasicInfo.Volts / 1000);
     tft.print("V");
     tft.println();
-    tft.setTextColor(TFT_BLUE, TFT_BLACK);
+
+    /*
+    //---single cell voltage---
+    tft.setTextColor(TFT_YELLOW, TFT_BLACK);
+    tft.print("(");
+    tft.print((float)packCellInfo.CellMedian / 1000);
+    tft.print("V");
+    tft.print(")");
+    tft.println();
+*/
+    //---main current---
+    tft.setTextColor(TFT_GREENYELLOW, TFT_BLACK);
     tft.print((float)packBasicInfo.Amps / 1000);
     tft.print("A");
     tft.println();
-    tft.setTextColor(TFT_RED, TFT_BLACK);
+
+    //---ampere hours---
+    tft.setTextColor(TFT_ORANGE, TFT_BLACK);
     tft.print((float)packBasicInfo.CapacityRemainAh / 1000);
     tft.print("Ah");
     tft.println();
+
+    //---battery percent---
     tft.setTextColor(TFT_WHITE, TFT_BLACK);
     tft.print(packBasicInfo.CapacityRemainPercent);
     tft.print("%");
     tft.println();
 
+    //---temperatures---
     tft.setTextSize(1);
     tft.setTextColor(TFT_YELLOW, TFT_BLACK);
-
     tft.print((float)packBasicInfo.Temp1 / 10);
     tft.print("C");
+    tft.print("    ");
+    tft.print((float)packBasicInfo.Temp2 / 10);
+    tft.print("C");
     tft.println();
+
     //------------draw little battery symbols---------
     for (uint8_t i = 0; i < 12; i++)
     {
         //       (uint8_t origin_x, uint8_t origin_y, uint8_t width, uint8_t height, float value, float valueMin, float valueMax, LCDCONSTRUCTOR &refLCD)
-        lcdBargraphVertical(i * 10 + 4, 108, 8, 20, packCellInfo.CellVolt[i], c_cellAbsMin, c_cellAbsMax, packCellInfo.CellColor[i], packCellInfo.CellColorDisbalance[i], tft); //packCellInfo.CellVolt[0]
+        lcdBargraphVertical(i * 10 + 4, 135, 8, 20, packCellInfo.CellVolt[i], c_cellAbsMin, c_cellAbsMax, packCellInfo.CellColor[i], packCellInfo.CellColorDisbalance[i], tft); //packCellInfo.CellVolt[0]
     }
 
     //------------draw testing rectagle---------
 
-    tft.fillRect(100, 10, 10, 10, color24to16(packCellInfo.CellColor[0]));
-
+    tft.fillRect(120, 10, 5, 10, TFT_RED);
+    tft.fillRect(120, 21, 5, 10, TFT_GREEN);
+    tft.fillRect(120, 32, 5, 10, TFT_BLUE);
+    //tft.fillRect(100, 10, 5, 10, color24to16(packCellInfo.CellColor[0]));
     //-------------print cell voltges--------
-    /*
+
     for (byte i = 1; i <= packCellInfo.NumOfCells; i++)
     {
-        tft.setTextColor(TFT_WHITE, TFT_BLACK);
+        tft.setTextColor(TFT_LIGHTGREY, TFT_BLACK);
         tft.print(i);
         if (i < 10)
         {
@@ -63,9 +85,8 @@ void showInfoLcd()
         {
             tft.print(". ");
         }
-
         tft.setTextColor(TFT_YELLOW, TFT_BLACK);
-        tft.print(packCellInfo.CellVolt[i - 1]);
+        tft.print((float)packCellInfo.CellVolt[i - 1] / 1000);
         tft.print("V");
         if (i % 2 != 0)
         {
@@ -76,7 +97,6 @@ void showInfoLcd()
             tft.println();
         }
     }
-*/
 }
 
 void lcdStartup()
@@ -189,7 +209,7 @@ void lcdBargraphVertical(uint8_t origin_x, uint8_t origin_y, uint8_t width, uint
     {
         box_height = 0;
     }
-    outsideColor = 0xFFFFFF;
+    outsideColor = 0xFAFAFA;
     refLCD.drawRect(origin_x, origin_y, width, height, color24to16(outsideColor)); //(u8g2_uint_t x, u8g2_uint_t y, u8g2_uint_t w, u8g2_uint_t h)
     refLCD.fillRect(nipple_origin_x, nipple_origin_y, nipple_width, nipple_height, color24to16(outsideColor));
 

@@ -130,6 +130,11 @@ bool processCellInfo(packCellInfoStruct *output, byte *data, unsigned int dataLe
         output->CellMedian = x[n / 2 + 1];
     }
 
+ for (uint8_t q = 0; q < output->NumOfCells; q++)
+    {
+        uint32_t disbal = abs(output->CellMedian - output->CellVolt[q]);
+        output->CellColorDisbalance[q] = getPixelColorHsv(mapHue(disbal, c_cellMaxDisbalance, 0), 255, 255);
+    }
     return true;
 };
 

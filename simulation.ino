@@ -25,6 +25,7 @@ void bmsFakeInfo3()
 
 void bmsFakeInfo4()
 {
+
     TRACE;
     uint16_t _cellSum;
     uint16_t _cellMin = 5000;
@@ -89,11 +90,23 @@ void bmsFakeInfo4()
     }
 
     //-----voltage disbalance color calculation
-    // for (uint8_t q = 0; q < packCellInfo.NumOfCells; q++)
-    // {
-    //     uint32_t disbal = abs(packCellInfo.CellMedian - packCellInfo.CellVolt[q]);
-    //     uint32_t disbalMin = packCellInfo.CellMedian - c_cellMaxDisbalance;
-    //     uint32_t disbalMax = packCellInfo.CellMedian - c_cellMaxDisbalance;
-    //     packCellInfo.CellColorDisbalance[q] = getPixelColorHsv(mapHue(disbal, disbalMin, disbalMax), 255, 255);
-    // }
+    for (uint8_t q = 0; q < packCellInfo.NumOfCells; q++)
+    {
+        uint32_t disbal = abs(packCellInfo.CellMedian - packCellInfo.CellVolt[q]);
+        packCellInfo.CellColorDisbalance[q] = getPixelColorHsv(mapHue(disbal, 0, c_cellMaxDisbalance), 255, 255);
+
+        commSerial.print("median ");
+        commSerial.println(packCellInfo.CellMedian);
+
+        commSerial.print(q);
+        commSerial.print("  uint32_t disbal: ");
+        commSerial.println(disbal);
+
+        commSerial.print(q);
+        commSerial.print("  mapval ");
+        commSerial.println(mapHue(disbal, 0, c_cellMaxDisbalance));
+
+        commSerial.println();
+        commSerial.println();
+    }
 }

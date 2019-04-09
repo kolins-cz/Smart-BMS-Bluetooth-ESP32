@@ -53,8 +53,14 @@ bool processBasicInfo(packBasicInfoStruct *output, byte *data, unsigned int data
 
     output->Volts = ((uint32_t)two_ints_into16(data[0], data[1])) * 10; // Resolution 10 mV -> convert to milivolts   eg 4895 > 48950mV
     output->Amps = ((int32_t)two_ints_into16(data[2], data[3])) * 10;   // Resolution 10 mA -> convert to miliamps
+
+    output->Watts = output->Volts * output->Amps; //still in mV
+
     output->CapacityRemainAh = ((uint16_t)two_ints_into16(data[4], data[5])) * 10;
     output->CapacityRemainPercent = ((uint8_t)data[19]);
+
+    output->CapacityRemainWh = (output->CapacityRemainAh / 1000) * (c_cellNominalVoltage / 1000) * packCellInfo.NumOfCells;
+
     output->Temp1 = (((uint16_t)two_ints_into16(data[23], data[24])) - 2731);
     output->Temp2 = (((uint16_t)two_ints_into16(data[25], data[26])) - 2731);
     output->BalanceCodeLow = (two_ints_into16(data[12], data[13]));
@@ -130,7 +136,7 @@ bool processCellInfo(packCellInfoStruct *output, byte *data, unsigned int dataLe
         output->CellMedian = x[n / 2 + 1];
     }
 
- for (uint8_t q = 0; q < output->NumOfCells; q++)
+    for (uint8_t q = 0; q < output->NumOfCells; q++)
     {
         uint32_t disbal = abs(output->CellMedian - output->CellVolt[q]);
         output->CellColorDisbalance[q] = getPixelColorHsv(mapHue(disbal, c_cellMaxDisbalance, 0), 255, 255);

@@ -36,16 +36,31 @@ void showInfoLcd()
     tft.print("A");
     tft.println();
 
+    /*
     //---ampere hours---
     tft.setTextColor(TFT_ORANGE, TFT_BLACK);
     tft.print((float)packBasicInfo.CapacityRemainAh / 1000);
     tft.print("Ah");
     tft.println();
+*/
+
+    //---watts---
+    tft.setTextColor(TFT_ORANGE, TFT_BLACK);
+    tft.print(packBasicInfo.Watts / 1000);
+    tft.print("W     ");
+    tft.println();
 
     //---battery percent---
     tft.setTextColor(TFT_WHITE, TFT_BLACK);
     tft.print(packBasicInfo.CapacityRemainPercent);
-    tft.print("%");
+    tft.print("% ");
+    //tft.println();
+
+    tft.print(" ");
+    //---battery Wh---
+    tft.setTextColor(TFT_WHITE, TFT_BLACK);
+    tft.print(packBasicInfo.CapacityRemainWh);
+    tft.print("Wh");
     tft.println();
 
     //---temperatures---
@@ -66,11 +81,13 @@ void showInfoLcd()
     }
 
     //------------draw testing rectagle---------
-
+    /*
     tft.fillRect(120, 10, 5, 10, TFT_RED);
     tft.fillRect(120, 21, 5, 10, TFT_GREEN);
     tft.fillRect(120, 32, 5, 10, TFT_BLUE);
     //tft.fillRect(100, 10, 5, 10, color24to16(packCellInfo.CellColor[0]));
+*/
+
     //-------------print cell voltges--------
 
     for (byte i = 1; i <= packCellInfo.NumOfCells; i++)

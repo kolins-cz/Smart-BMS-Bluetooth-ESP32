@@ -208,18 +208,7 @@ bool bmsCollectPacket_uart(byte *packet) //unused function to get packet directl
         actualByte = bmsSerial.read();
         if (previousByte == packetLastByte && actualByte == packet1stByte) //got packet footer
         {
-            //commSerial.println("");
-            //commSerial.print("got packet footer. packet length = ");
-            //commSerial.println(bmsPacketBuffCount);
-
             memcpy(packet, bmsPacketBuff, bmsPacketBuffCount);
-
-            //for (int i=0; i < bmsPacketBuffCount; i++)  //spit out resulting packet byte by byte here
-            //{
-            //commSerial.print(bmsPacketBuff[i], HEX);
-            //commSerial.print(" ");
-            //}
-            //commSerial.println("");
             inProgress = false;
             retVal = true;
         }
@@ -228,14 +217,10 @@ bool bmsCollectPacket_uart(byte *packet) //unused function to get packet directl
             bmsPacketBuff[bmsPacketBuffCount] = actualByte;
             bmsPacketBuffCount++;
             retVal = false;
-            //commSerial.print(".");
         }
 
         if (previousByte == packet1stByte && (actualByte == packet2ndByte || actualByte == packet2ndByte_alt)) //got packet header
         {
-            //commSerial.println("");
-            //commSerial.println("");
-            //commSerial.print("got packet header. accumulating data.");
             bmsPacketBuff[0] = previousByte;
             bmsPacketBuff[1] = actualByte;
             bmsPacketBuffCount = 2; // for next pass. [0] and [1] are filled already

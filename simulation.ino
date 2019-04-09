@@ -1,3 +1,27 @@
+void bmsSimulate()
+{
+	TRACE;
+	unsigned long currentMillis = millis();
+	if ((currentMillis - previousMillis >= 125))
+	{
+		previousMillis = currentMillis;
+		showInfoLcd();
+		showInfoOled();
+		stripTest();
+		if (toggle) //alternate info3 and info4
+		{
+			bmsFakeInfo3();
+			//showBasicInfo();
+			newPacketReceived = false;
+		}
+		else
+		{
+			bmsFakeInfo4();
+			//showCellInfo();
+		}
+		toggle = !toggle;
+	}
+}
 
 
 void bmsFakeInfo3()

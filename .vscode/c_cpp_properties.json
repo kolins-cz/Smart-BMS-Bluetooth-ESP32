@@ -3,6 +3,9 @@
         {
             "name": "Win32",
             "includePath": [
+                "C:\\\\work\\\\arduino-PR-beta1.9-BUILD-105\\\\portable\\\\packages\\\\esp32\\\\tools\\\\**",
+                "C:\\\\work\\\\arduino-PR-beta1.9-BUILD-105\\\\portable\\\\packages\\\\esp32\\\\hardware\\\\esp32\\\\1.0.1\\\\**",
+                "C:\\\\work\\\\arduino-PR-beta1.9-BUILD-105\\\\portable\\\\sketchbook\\\\libraries\\\\**",
                 "C:\\d_drive\\private\\work\\arduino-1.8.8\\portable\\packages\\esp32\\tools\\**",
                 "C:\\d_drive\\private\\work\\arduino-1.8.8\\portable\\packages\\esp32\\hardware\\esp32\\1.0.1\\**",
                 "${workspaceFolder}/**",

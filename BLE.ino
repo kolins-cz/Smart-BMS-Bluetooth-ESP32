@@ -16,58 +16,117 @@ static BLEUUID charUUID_rx("0000ff01-0000-1000-8000-00805f9b34fb"); //xiaoxiang 
 
 class MyAdvertisedDeviceCallbacks : public BLEAdvertisedDeviceCallbacks
 { //this is called by some underlying magic
-	/**
+    /**
 	* Called for each advertising BLE server.
 	*/
-	void onResult(BLEAdvertisedDevice advertisedDevice)
-	{
-		commSerial.print("BLE Advertised Device found: ");
-		commSerial.println(advertisedDevice.toString().c_str());
+    void onResult(BLEAdvertisedDevice advertisedDevice)
+    {
+        commSerial.print("BLE Advertised Device found: ");
+        commSerial.println(advertisedDevice.toString().c_str());
 
-		// We have found a device, let us now see if it contains the service we are looking for.
-		if (advertisedDevice.haveServiceUUID() && advertisedDevice.isAdvertisingService(serviceUUID))
-		{
+        // We have found a device, let us now see if it contains the service we are looking for.
+        if (advertisedDevice.haveServiceUUID() && advertisedDevice.isAdvertisingService(serviceUUID))
+        {
 
-			BLEDevice::getScan()->stop();
-			myDevice = new BLEAdvertisedDevice(advertisedDevice);
-			doConnect = true;
-			doScan = true;
+            BLEDevice::getScan()->stop();
+            myDevice = new BLEAdvertisedDevice(advertisedDevice);
+            doConnect = true;
+            doScan = true;
 
-		} // Found our server
-	}	 // onResult
-};		  // MyAdvertisedDeviceCallbacks
+        } // Found our server
+    }     // onResult
+};        // MyAdvertisedDeviceCallbacks
 class MyClientCallback : public BLEClientCallbacks
 { //this is called on connect / disconnect by some underlying magic+
 
-	void onConnect(BLEClient *pclient)
-	{
-	}
+    void onConnect(BLEClient *pclient)
+    {
+    }
 
-	void onDisconnect(BLEClient *pclient)
-	{
-		BLE_client_connected = false;
-		commSerial.println("onDisconnect");
-		lcdDisconnect();
-	}
+    void onDisconnect(BLEClient *pclient)
+    {
+        BLE_client_connected = false;
+        commSerial.println("onDisconnect");
+        lcdDisconnect();
+    }
 };
+
+void bleRequestData()
+{
+#ifndef SIMULATION
+
+    // If the flag "doConnect" is true then we have scanned for and found the desired
+    // BLE Server with which we wish to connect.  Now we connect to it.  Once we are
+    // connected we set the connected flag to be true.
+    if (doConnect == true)
+    {
+        if (connectToServer())
+        {
+            commSerial.println("We are now connected to the BLE Server.");
+            lcdConnected();
+        }
+        else
+        {
+            lcdConnectionFailed();
+        }
+        doConnect = false;
+    }
+
+    // If we are connected to a peer BLE Server, update the characteristic each time we are reached
+    // with the current time since boot.
+    if (BLE_client_connected == true)
+    {
+
+        unsigned long currentMillis = millis();
+        if ((currentMillis - previousMillis >= interval || newPacketReceived)) //every time period or when packet is received
+        {
+            previousMillis = currentMillis;
+            showInfoLcd();
+
+            if (toggle) //alternate info3 and info4
+            {
+                bmsGetInfo3();
+                //showBasicInfo();
+                newPacketReceived = false;
+            }
+            else
+            {
+                bmsGetInfo4();
+                //showCellInfo();
+                newPacketReceived = false;
+            }
+            toggle = !toggle;
+        }
+    }
+    else if (doScan)
+    {
+        BLEDevice::getScan()->start(0); // this is just example to start scan after disconnect, most likely there is better way to do it in arduino
+    }
+#endif
+
+#ifdef SIMULATION
+    bmsSimulate();
+#endif
+}
 
 void bleStartup()
 {
-TRACE;
-	BLEDevice::init("");
+#ifndef SIMULATION
 
-	// Retrieve a Scanner and set the callback we want to use to be informed when we
-	// have detected a new device.  Specify that we want active scanning and start the
-	// scan to run for 5 seconds.
-	BLEScan *pBLEScan = BLEDevice::getScan();
-	pBLEScan->setAdvertisedDeviceCallbacks(new MyAdvertisedDeviceCallbacks());
-	pBLEScan->setInterval(1349);
-	pBLEScan->setWindow(449);
-	pBLEScan->setActiveScan(true);
-	pBLEScan->start(5, true);
+    TRACE;
+    BLEDevice::init("");
 
+    // Retrieve a Scanner and set the callback we want to use to be informed when we
+    // have detected a new device.  Specify that we want active scanning and start the
+    // scan to run for 5 seconds.
+    BLEScan *pBLEScan = BLEDevice::getScan();
+    pBLEScan->setAdvertisedDeviceCallbacks(new MyAdvertisedDeviceCallbacks());
+    pBLEScan->setInterval(1349);
+    pBLEScan->setWindow(449);
+    pBLEScan->setActiveScan(true);
+    pBLEScan->start(5, true);
+#endif
 }
-
 
 static void notifyCallback(BLERemoteCharacteristic *pBLERemoteCharacteristic, uint8_t *pData, size_t length, bool isNotify) //this is called when BLE server sents data via notofication
 {

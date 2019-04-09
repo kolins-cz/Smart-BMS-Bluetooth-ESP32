@@ -7,9 +7,6 @@ void showInfoLcd()
 {
     TRACE;
 
-    //drawRoundRect(int32_t x, int32_t y, int32_t w, int32_t h, int32_t r, uint32_t color)
-    //tft.drawRoundRect();
-
     //tft.fillScreen(TFT_BLACK); // CLEAR makes nasty flicker, don't use
     tft.setCursor(0, 5);
 
@@ -114,6 +111,37 @@ void showInfoLcd()
             tft.println();
         }
     }
+    //----draw wifi icon----
+    if (WiFi.status() == WL_CONNECTED)
+    {
+        tft.fillRect(122, 0, 5, 5, TFT_GREEN);
+    }
+    else
+    {
+        tft.fillRect(122, 0, 5, 5, TFT_DARKGREY);
+    }
+}
+
+void lcdStartNetworking()
+{
+
+    tft.println("looking for wifi AP");
+}
+
+void lcdNetworkStatus(uint8_t state)
+{
+    switch (state)
+    {
+    case 0:
+        tft.println("wifi connected");
+        tft.println(WiFi.localIP());
+        break;
+    case 1:
+        tft.println("wifi failed connect");
+    default:
+        tft.println("unkwon error");
+        break;
+    }
 }
 
 void lcdStartup()
@@ -124,8 +152,7 @@ void lcdStartup()
     tft.setRotation(0); //
     tft.setCursor(3, 5);
     tft.setTextColor(TFT_WHITE);
-    tft.println("starting");
-    tft.println("looking for BMS...");
+    tft.println("starting ebike");
 }
 
 void lcdDisconnect()

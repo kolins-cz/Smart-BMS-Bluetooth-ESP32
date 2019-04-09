@@ -25,7 +25,7 @@ known bugs:
 //#define SIMULATION
 #include <Arduino.h>
 #include "BLEDevice.h"
-//#include "BLEScan.h"
+//#include "BLEScan.h"  //why this is commented?
 #include "mydatatypes.h"
 #include <SPI.h>
 #include <TFT_eSPI.h>
@@ -33,8 +33,15 @@ known bugs:
 #include <U8g2lib.h>
 #include <Wire.h>
 
+#include <WiFi.h>
+#include <WiFiClient.h>
+#include <WebServer.h>
+#include <Update.h>
+#include "webpages.h"
+
 HardwareSerial commSerial(0);
 HardwareSerial bmsSerial(1);
+WebServer server(80);
 
 //---- global variables ----
 
@@ -53,106 +60,28 @@ unsigned long previousMillis = 0;
 const long interval = 2000;
 
 bool toggle = false;
-bool newPacketReceived = true;
+bool newPacketReceived = false;
 
 void setup()
 {
 
 	commSerial.begin(115200, SERIAL_8N1, 3, 1);
 	bmsSerial.begin(9600, SERIAL_8N1, 21, 22);
-	commSerial.println("Starting Arduino BLE Client application...");
-//	stripStartup();
-//	oled_startup();
+	commSerial.println("Starting ebike dashboard application...");
+	//	stripStartup();
+	//	oled_startup();
 	lcdStartup();
-#ifndef SIMULATION
+	newtworkStartup();
 	bleStartup();
-#endif
 }
-
+//---------------------main loop------------------
 void loop()
 {
-#ifndef SIMULATION
-	// If the flag "doConnect" is true then we have scanned for and found the desired
-	// BLE Server with which we wish to connect.  Now we connect to it.  Once we are
-	// connected we set the connected flag to be true.
-	if (doConnect == true)
+	bleRequestData();
+	server.handleClient();
+	if (newPacketReceived == true)
 	{
-		if (connectToServer())
-		{
-			commSerial.println("We are now connected to the BLE Server.");
-			lcdConnected();
-		}
-		else
-		{
-			lcdConnectionFailed();
-		}
-		doConnect = false;
-	}
-
-	// If we are connected to a peer BLE Server, update the characteristic each time we are reached
-	// with the current time since boot.
-	if (BLE_client_connected == true)
-	{
-
-		bmsWorker();
-	}
-	else if (doScan)
-	{
-		BLEDevice::getScan()->start(0); // this is just eample to start scan after disconnect, most likely there is better way to do it in arduino
-	}
-#endif
-
-#ifdef SIMULATION
-	bmsWorkerSimulation();
-#endif
-}
-
-void bmsWorker()
-{
-	TRACE;
-	unsigned long currentMillis = millis();
-	if ((currentMillis - previousMillis >= interval || newPacketReceived)) //every time period or when packet is received
-	{
-		previousMillis = currentMillis;
-		showInfoLcd();
-
-		if (toggle) //alternate info3 and info4
-		{
-			bmsGetInfo3();
-			showBasicInfo();
-			newPacketReceived = false;
-		}
-		else
-		{
-			bmsGetInfo4();
-			showCellInfo();
-			newPacketReceived = false;
-		}
-		toggle = !toggle;
+		showInfoLcd;
 	}
 }
-
-void bmsWorkerSimulation()
-{
-	TRACE;
-	unsigned long currentMillis = millis();
-	if ((currentMillis - previousMillis >= 125))
-	{
-		previousMillis = currentMillis;
-		showInfoLcd();
-		showInfoOled();
-		stripTest();
-		if (toggle) //alternate info3 and info4
-		{
-			bmsFakeInfo3();
-			//showBasicInfo();
-			newPacketReceived = false;
-		}
-		else
-		{
-			bmsFakeInfo4();
-			//showCellInfo();
-		}
-		toggle = !toggle;
-	}
-}
+//---------------------/ main loop------------------

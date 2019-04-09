@@ -29,8 +29,8 @@ known bugs:
 #include "mydatatypes.h"
 #include <SPI.h>
 #include <TFT_eSPI.h>
-#include <NeoPixelBrightnessBus.h>
-#include <U8g2lib.h>
+//#include <NeoPixelBrightnessBus.h>
+//#include <U8g2lib.h>
 #include <Wire.h>
 
 #include <WiFi.h>

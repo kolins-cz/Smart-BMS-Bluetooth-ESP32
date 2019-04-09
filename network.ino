@@ -2,7 +2,6 @@
 const char *ssid = "kolin2";
 const char *password = "hovnokleslo";
 
-
 //WebServer server(80);
 
 void newtworkStartup()
@@ -24,21 +23,24 @@ void newtworkStartup()
         lcdNetworkStatus(1);
         commSerial.println("");
         commSerial.print("failed to connect in time");
-
     }
 
     server.on("/", HTTP_GET, handleIndexPage);
     server.on("/firmware", HTTP_GET, handleFirmwarePage);
     server.on("/firmwareupdate", HTTP_POST, handleFirmware1, handleFirmware2);
-    server.on("/readADC", handleADC); //To get update of ADC Value only
+    server.on("/getdata", handleData); //To get update of ADC Value only
     server.begin();
 }
 
-void handleADC()
+void handleData()
 {
     int a = random(1024);
-    String adcValue = String(a);
-    server.send(200, "text/plane", adcValue); //Send ADC value only to client ajax request
+
+    
+    //constructBigString();
+    //commSerial.print(stringBuffer);
+    String webValue = String(a);
+    server.send(200, "text/plane", webValue); //Send ADC value only to client ajax request
 }
 
 void handleIndexPage()

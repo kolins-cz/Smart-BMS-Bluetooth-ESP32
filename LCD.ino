@@ -13,8 +13,10 @@ void showInfoLcd()
     tft.setTextSize(2);
 
     //---main voltage---
+
     tft.setTextColor(TFT_GREEN, TFT_BLACK);
     tft.print((float)packBasicInfo.Volts / 1000);
+    
     tft.print("V");
     tft.println();
 
@@ -30,7 +32,7 @@ void showInfoLcd()
     //---main current---
     tft.setTextColor(TFT_GREENYELLOW, TFT_BLACK);
     tft.print((float)packBasicInfo.Amps / 1000);
-    tft.print("A");
+    tft.print("A    ");
     tft.println();
 
     /*
@@ -43,14 +45,14 @@ void showInfoLcd()
 
     //---watts---
     tft.setTextColor(TFT_ORANGE, TFT_BLACK);
-    tft.print(packBasicInfo.Watts / 1000);
-    tft.print("W     ");
+    tft.print(packBasicInfo.Watts);
+    tft.print("W    ");
     tft.println();
 
     //---battery percent---
     tft.setTextColor(TFT_WHITE, TFT_BLACK);
     tft.print(packBasicInfo.CapacityRemainPercent);
-    tft.print("% ");
+    tft.print("%");
     //tft.println();
 
     tft.print(" ");
@@ -74,7 +76,7 @@ void showInfoLcd()
     for (uint8_t i = 0; i < 12; i++)
     {
         //       (uint8_t origin_x, uint8_t origin_y, uint8_t width, uint8_t height, float value, float valueMin, float valueMax, LCDCONSTRUCTOR &refLCD)
-        lcdBargraphVertical(i * 10 + 4, 135, 8, 20, packCellInfo.CellVolt[i], c_cellAbsMin, c_cellAbsMax, packCellInfo.CellColor[i], packCellInfo.CellColorDisbalance[i], tft); //packCellInfo.CellVolt[0]
+        lcdBargraphVertical(i * 10 + 4, 135, 8, 20, packCellInfo.CellVolt[i], c_cellAbsMin, c_cellAbsMax, packCellInfo.CellColor[i], packCellInfo.CellColorDisbalance[i], tft); 
     }
 
     //------------draw testing rectagle---------
@@ -86,7 +88,7 @@ void showInfoLcd()
 */
 
     //-------------print cell voltges--------
-
+    /*
     for (byte i = 1; i <= packCellInfo.NumOfCells; i++)
     {
         tft.setTextColor(TFT_LIGHTGREY, TFT_BLACK);
@@ -111,6 +113,8 @@ void showInfoLcd()
             tft.println();
         }
     }
+
+*/
     //----draw wifi icon----
     if (WiFi.status() == WL_CONNECTED)
     {
@@ -120,6 +124,13 @@ void showInfoLcd()
     {
         tft.fillRect(122, 0, 5, 5, TFT_DARKGREY);
     }
+
+    //-----draw progressbar-----
+
+    drawBar(3, 85, 122, 15, packBasicInfo.CapacityRemainPercent, TFT_WHITE, color24to16(getPixelColorHsv(mapHue(packBasicInfo.CapacityRemainPercent, 0, 100), 255, 255)), tft);
+    
+    drawBar(3, 105, 122, 15, map(abs(packBasicInfo.Watts), 0, c_packMaxWatt, 0,100),TFT_WHITE, color24to16(getPixelColorHsv(mapHue(abs(packBasicInfo.Watts), c_packMaxWatt, 0), 255, 255)), tft);
+
 }
 
 void lcdStartNetworking()
@@ -147,6 +158,7 @@ void lcdNetworkStatus(uint8_t state)
 void lcdStartup()
 {
     tft.init();
+    tft.setTextWrap(false);
     tft.fillScreen(TFT_BLACK); // CLEAR
 
     tft.setRotation(0); //
@@ -258,4 +270,17 @@ void lcdBargraphVertical(uint8_t origin_x, uint8_t origin_y, uint8_t width, uint
     refLCD.fillRect(nipple_origin_x, nipple_origin_y, nipple_width, nipple_height, color24to16(outsideColor));
 
     refLCD.fillRect(box_origin_x, box_origin_y, box_width, box_height, color24to16(insideColor));
+}
+
+void drawBar(uint16_t x, uint16_t y, uint16_t w, uint16_t h, uint8_t percent, uint16_t frameColor, uint16_t barColor, LCDCONSTRUCTOR &refLCD)
+{
+    if (percent == 0)
+    {
+        refLCD.fillRoundRect(x, y, w, h, 3, TFT_BLACK);
+    }
+    uint8_t margin = 2;
+    uint16_t barHeight = h - 2 * margin;
+    uint16_t barWidth = w - 2 * margin;
+    refLCD.drawRoundRect(x, y, w, h, 3, frameColor);
+    refLCD.fillRect(x + margin, y + margin, barWidth * percent / 100.0, barHeight, barColor);
 }

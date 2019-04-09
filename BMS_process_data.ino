@@ -54,7 +54,7 @@ bool processBasicInfo(packBasicInfoStruct *output, byte *data, unsigned int data
     output->Volts = ((uint32_t)two_ints_into16(data[0], data[1])) * 10; // Resolution 10 mV -> convert to milivolts   eg 4895 > 48950mV
     output->Amps = ((int32_t)two_ints_into16(data[2], data[3])) * 10;   // Resolution 10 mA -> convert to miliamps
 
-    output->Watts = output->Volts * output->Amps; //still in mV
+    output->Watts = output->Volts * output->Amps /   1000000; // W
 
     output->CapacityRemainAh = ((uint16_t)two_ints_into16(data[4], data[5])) * 10;
     output->CapacityRemainPercent = ((uint8_t)data[19]);
@@ -349,4 +349,32 @@ int16_t two_ints_into16(int highbyte, int lowbyte) // turns two bytes into a sin
     result <<= 8;                //Left shift 8 bits,
     result = (result | lowbyte); //OR operation, merge the two
     return result;
+}
+
+void constructBigString() //debug all data to uart
+{
+    TRACE;
+    stringBuffer[0] = '\0'; //clear old data
+    snprintf(stringBuffer, STRINGBUFFERSIZE, "Total voltage: %f\n", (float)packBasicInfo.Volts / 1000);
+    snprintf(stringBuffer, STRINGBUFFERSIZE, "Amps: %f\n", (float)packBasicInfo.Amps / 1000);
+    snprintf(stringBuffer, STRINGBUFFERSIZE, "CapacityRemainAh: %f\n", (float)packBasicInfo.CapacityRemainAh / 1000);
+    snprintf(stringBuffer, STRINGBUFFERSIZE, "CapacityRemainPercent: %d\n", packBasicInfo.CapacityRemainPercent);
+    snprintf(stringBuffer, STRINGBUFFERSIZE, "Temp1: %f\n", (float)packBasicInfo.Temp1 / 10);
+    snprintf(stringBuffer, STRINGBUFFERSIZE, "Temp2: %f\n", (float)packBasicInfo.Temp2 / 10);
+    snprintf(stringBuffer, STRINGBUFFERSIZE, "Balance Code Low: 0x%x\n", packBasicInfo.BalanceCodeLow);
+    snprintf(stringBuffer, STRINGBUFFERSIZE, "Balance Code High: 0x%x\n", packBasicInfo.BalanceCodeHigh);
+    snprintf(stringBuffer, STRINGBUFFERSIZE, "Mosfet Status: 0x%x\n", packBasicInfo.MosfetStatus);
+
+    snprintf(stringBuffer, STRINGBUFFERSIZE, "Number of cells: %u\n", packCellInfo.NumOfCells);
+    for (byte i = 1; i <= packCellInfo.NumOfCells; i++)
+    {
+        snprintf(stringBuffer, STRINGBUFFERSIZE, "Cell no. %u", i);
+        snprintf(stringBuffer, STRINGBUFFERSIZE, "   %f\n", (float)packCellInfo.CellVolt[i - 1] / 1000);
+    }
+    snprintf(stringBuffer, STRINGBUFFERSIZE, "Max cell volt: %f\n", (float)packCellInfo.CellMax / 1000);
+    snprintf(stringBuffer, STRINGBUFFERSIZE, "Min cell volt: %f\n", (float)packCellInfo.CellMin / 1000);
+    snprintf(stringBuffer, STRINGBUFFERSIZE, "Difference cell volt: %f\n", (float)packCellInfo.CellDiff / 1000);
+    snprintf(stringBuffer, STRINGBUFFERSIZE, "Average cell volt: %f\n", (float)packCellInfo.CellAvg / 1000);
+    snprintf(stringBuffer, STRINGBUFFERSIZE, "Median cell volt: %f\n", (float)packCellInfo.CellMedian / 1000);
+    snprintf(stringBuffer, STRINGBUFFERSIZE, "\n");
 }

@@ -6,8 +6,8 @@ void bmsSimulate()
 	{
 		previousMillis = currentMillis;
 		showInfoLcd();
-		showInfoOled();
-		stripTest();
+		//showInfoOled();
+		//stripTest();
 		if (toggle) //alternate info3 and info4
 		{
 			bmsFakeInfo3();

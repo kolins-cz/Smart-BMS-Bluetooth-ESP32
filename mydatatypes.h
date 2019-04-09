@@ -20,7 +20,7 @@ typedef struct
 {
 	uint16_t Volts; // unit 1mV
 	int32_t Amps;   // unit 1mA
-	int32_t Watts;   // unit 1mA
+	int32_t Watts;   // unit 1W
 	uint16_t CapacityRemainAh;
 	uint8_t CapacityRemainPercent; //unit 1%
 	uint32_t CapacityRemainWh; 	//unit Wh
@@ -59,11 +59,15 @@ struct packEepromStruct
 	uint16_t DSGOC;
 };
 
+#define STRINGBUFFERSIZE 300
+char stringBuffer[STRINGBUFFERSIZE];
+
 const int32_t c_cellNominalVoltage = 3700;
 
 const uint16_t c_cellAbsMin = 3000;
 const uint16_t c_cellAbsMax = 4200;
 
+const int32_t c_packMaxWatt = 1200;
 
 const uint16_t c_cellMaxDisbalance = 1500; //200; // cell different by this value from cell median is getting violet (worst) color
 

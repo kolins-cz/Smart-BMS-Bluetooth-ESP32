@@ -274,7 +274,7 @@ void lcdBargraphVertical(uint8_t origin_x, uint8_t origin_y, uint8_t width, uint
 
 void drawBar(uint16_t x, uint16_t y, uint16_t w, uint16_t h, uint8_t percent, uint16_t frameColor, uint16_t barColor, LCDCONSTRUCTOR &refLCD)
 {
-    if (percent == 0)
+    if (true) //percent == 0)
     {
         refLCD.fillRoundRect(x, y, w, h, 3, TFT_BLACK);
     }
@@ -283,4 +283,5 @@ void drawBar(uint16_t x, uint16_t y, uint16_t w, uint16_t h, uint8_t percent, ui
     uint16_t barWidth = w - 2 * margin;
     refLCD.drawRoundRect(x, y, w, h, 3, frameColor);
     refLCD.fillRect(x + margin, y + margin, barWidth * percent / 100.0, barHeight, barColor);
+    
 }

@@ -82,6 +82,8 @@ void loop()
 	if (newPacketReceived == true)
 	{
 		showInfoLcd;
+		printBasicInfo();
+		printCellInfo();
 	}
 }
 //---------------------/ main loop------------------

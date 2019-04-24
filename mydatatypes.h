@@ -67,7 +67,7 @@ const int32_t c_cellNominalVoltage = 3700;
 const uint16_t c_cellAbsMin = 3000;
 const uint16_t c_cellAbsMax = 4200;
 
-const int32_t c_packMaxWatt = 1200;
+const int32_t c_packMaxWatt = 1250;
 
 const uint16_t c_cellMaxDisbalance = 1500; //200; // cell different by this value from cell median is getting violet (worst) color
 

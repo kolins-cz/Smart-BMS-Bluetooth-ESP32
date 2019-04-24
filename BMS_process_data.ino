@@ -54,12 +54,12 @@ bool processBasicInfo(packBasicInfoStruct *output, byte *data, unsigned int data
     output->Volts = ((uint32_t)two_ints_into16(data[0], data[1])) * 10; // Resolution 10 mV -> convert to milivolts   eg 4895 > 48950mV
     output->Amps = ((int32_t)two_ints_into16(data[2], data[3])) * 10;   // Resolution 10 mA -> convert to miliamps
 
-    output->Watts = output->Volts * output->Amps /   1000000; // W
+    output->Watts = output->Volts * output->Amps / 1000000; // W
 
     output->CapacityRemainAh = ((uint16_t)two_ints_into16(data[4], data[5])) * 10;
     output->CapacityRemainPercent = ((uint8_t)data[19]);
 
-    output->CapacityRemainWh = (output->CapacityRemainAh / 1000) * (c_cellNominalVoltage / 1000) * packCellInfo.NumOfCells;
+    output->CapacityRemainWh = (output->CapacityRemainAh * c_cellNominalVoltage) / 1000000 * packCellInfo.NumOfCells;
 
     output->Temp1 = (((uint16_t)two_ints_into16(data[23], data[24])) - 2731);
     output->Temp2 = (((uint16_t)two_ints_into16(data[25], data[26])) - 2731);
@@ -299,7 +299,7 @@ void bmsGetInfo4()
     //commSerial.println("Request info4 sent");
 }
 
-void showBasicInfo() //debug all data to uart
+void printBasicInfo() //debug all data to uart
 {
     TRACE;
     commSerial.printf("Total voltage: %f\n", (float)packBasicInfo.Volts / 1000);
@@ -313,7 +313,7 @@ void showBasicInfo() //debug all data to uart
     commSerial.printf("Mosfet Status: 0x%x\n", packBasicInfo.MosfetStatus);
 }
 
-void showCellInfo() //debug all data to uart
+void printCellInfo() //debug all data to uart
 {
     TRACE;
     commSerial.printf("Number of cells: %u\n", packCellInfo.NumOfCells);

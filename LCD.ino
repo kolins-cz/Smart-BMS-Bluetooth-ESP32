@@ -149,8 +149,8 @@ void showInfoLcd()
 
     char unit2[] = "W";
     bar.setColorDepth(18);
-    bar.createSprite(122,20);
-    drawBarUnit(0, 0, 122, 20, 0, 1150, abs(packBasicInfo.Watts), TFT_WHITE, color24to16(getPixelColorHsv(mapHue(abs(packBasicInfo.Watts), 0, 1150), 255, 255)), unit2, bar);
+    bar.createSprite(122, 26);
+    drawBarUnit(0, 0, 122, 26, 0, c_packMaxWatt, abs(packBasicInfo.Watts), TFT_WHITE, color24to16(getPixelColorHsv(mapHue(abs(packBasicInfo.Watts), c_packMaxWatt, 0), 255, 255)), unit2, bar);
     bar.pushSprite(1, 105);
     bar.deleteSprite();
 }
@@ -350,7 +350,7 @@ void drawBarUnit(uint16_t x, uint16_t y, uint16_t w, uint16_t h, uint32_t valueM
     sprintf(tbuff, "%4d", value);
     strcat(tbuff, unit);
 
-    drawBar(x, y, w, h, valueMin, valueMax, value, frameColor, color24to16(getPixelColorHsv(mapHue(value, valueMin, valueMax), 255, 255)), bar); //draw only bar
+    drawBar(x, y, w, h, valueMin, valueMax, value, frameColor, barColor, bar); //draw only bar
     //refLCD.setTextSize(3);
     refLCD.setTextColor(TFT_BLACK);
     refLCD.drawString(tbuff, x + w / 2 - border - tw, y + h / 2 + border - th, font); //black border, drawing same text offseted by 'border' all the way round

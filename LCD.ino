@@ -3,8 +3,12 @@
 #define LCDCONSTRUCTOR TFT_eSPI
 LCDCONSTRUCTOR tft = TFT_eSPI();
 
+#define SPRITECONSTRUCTOR TFT_eSprite
+SPRITECONSTRUCTOR bar = TFT_eSprite(&tft);
+
 void showInfoLcd()
 {
+
     TRACE;
 
     //tft.fillScreen(TFT_BLACK); // CLEAR makes nasty flicker, don't use
@@ -16,7 +20,7 @@ void showInfoLcd()
 
     tft.setTextColor(TFT_GREEN, TFT_BLACK);
     tft.print((float)packBasicInfo.Volts / 1000);
-    
+
     tft.print("V");
     tft.println();
 
@@ -73,11 +77,16 @@ void showInfoLcd()
     tft.println();
 
     //------------draw little battery symbols---------
+    bar.setColorDepth(18);
+    bar.createSprite(128, 22);
     for (uint8_t i = 0; i < 12; i++)
     {
         //       (uint8_t origin_x, uint8_t origin_y, uint8_t width, uint8_t height, float value, float valueMin, float valueMax, LCDCONSTRUCTOR &refLCD)
-        lcdBargraphVertical(i * 10 + 4, 135, 8, 20, packCellInfo.CellVolt[i], c_cellAbsMin, c_cellAbsMax, packCellInfo.CellColor[i], packCellInfo.CellColorDisbalance[i], tft); 
+        lcdBargraphVertical(i * 10 + 4, 2, 8, 20, packCellInfo.CellVolt[i], c_cellAbsMin, c_cellAbsMax, packCellInfo.CellColor[i], packCellInfo.CellColorDisbalance[i], bar);
     }
+
+    bar.pushSprite(0, 138);
+    bar.deleteSprite();
 
     //------------draw testing rectagle---------
     /*
@@ -116,44 +125,57 @@ void showInfoLcd()
 
 */
     //----draw wifi icon----
-    if (WiFi.status() == WL_CONNECTED)
-    {
-        tft.fillRect(122, 0, 5, 5, TFT_GREEN);
-    }
-    else
-    {
-        tft.fillRect(122, 0, 5, 5, TFT_DARKGREY);
-    }
+    // if (WiFi.status() == WL_CONNECTED)
+    // {
+    //     tft.fillRect(122, 0, 5, 5, TFT_GREEN);
+    // }
+    // else
+    // {
+    //     tft.fillRect(122, 0, 5, 5, TFT_DARKGREY);
+    // }
 
     //-----draw progressbar-----
 
-    drawBar(3, 85, 122, 15, packBasicInfo.CapacityRemainPercent, TFT_WHITE, color24to16(getPixelColorHsv(mapHue(packBasicInfo.CapacityRemainPercent, 0, 100), 255, 255)), tft);
-    
-    drawBar(3, 105, 122, 15, map(abs(packBasicInfo.Watts), 0, c_packMaxWatt, 0,100),TFT_WHITE, color24to16(getPixelColorHsv(mapHue(abs(packBasicInfo.Watts), c_packMaxWatt, 0), 255, 255)), tft);
+    //drawBar(3, 85, 122, 15, packBasicInfo.CapacityRemainPercent, TFT_WHITE, color24to16(getPixelColorHsv(mapHue(packBasicInfo.CapacityRemainPercent, 0, 100), 255, 255)), tft);
 
+    //drawBar(3, 105, 122, 15, map(abs(packBasicInfo.Watts), 0, c_packMaxWatt, 0, 100), TFT_WHITE, color24to16(getPixelColorHsv(mapHue(abs(packBasicInfo.Watts), c_packMaxWatt, 0), 255, 255)), tft);
+
+    char unit1[] = "%";
+    bar.setColorDepth(18);
+    bar.createSprite(122, 20);
+    drawBarUnit(0, 0, 122, 20, 0, 100, packBasicInfo.CapacityRemainPercent, TFT_WHITE, color24to16(getPixelColorHsv(mapHue(packBasicInfo.CapacityRemainPercent, 0, 100), 255, 255)), unit1, bar);
+    bar.pushSprite(1, 80);
+    bar.deleteSprite();
+
+    char unit2[] = "W";
+    bar.setColorDepth(18);
+    bar.createSprite(122,20);
+    drawBarUnit(0, 0, 122, 20, 0, 1150, abs(packBasicInfo.Watts), TFT_WHITE, color24to16(getPixelColorHsv(mapHue(abs(packBasicInfo.Watts), 0, 1150), 255, 255)), unit2, bar);
+    bar.pushSprite(1, 105);
+    bar.deleteSprite();
 }
 
-void lcdStartNetworking()
-{
+// void lcdStartNetworking()
+// {
 
-    tft.println("looking for wifi AP");
-}
+//     tft.println("looking for wifi AP");
+// }
 
-void lcdNetworkStatus(uint8_t state)
-{
-    switch (state)
-    {
-    case 0:
-        tft.println("wifi connected");
-        tft.println(WiFi.localIP());
-        break;
-    case 1:
-        tft.println("wifi failed connect");
-    default:
-        tft.println("unkwon error");
-        break;
-    }
-}
+// void lcdNetworkStatus(uint8_t state)
+// {
+//     switch (state)
+//     {
+//     case 0:
+//         tft.println("wifi connected");
+//         tft.println(WiFi.localIP());
+//         break;
+//     case 1:
+//         tft.println("wifi failed connect");
+//     default:
+//         tft.println("unkwon error");
+//         break;
+//     }
+// }
 
 void lcdStartup()
 {
@@ -233,7 +255,7 @@ void lcdExample()
 {
 }
 
-void lcdBargraphVertical(uint8_t origin_x, uint8_t origin_y, uint8_t width, uint8_t height, uint16_t value, uint16_t valueMin, uint16_t valueMax, uint32_t insideColor, uint32_t outsideColor, LCDCONSTRUCTOR &refLCD)
+void lcdBargraphVertical(uint8_t origin_x, uint8_t origin_y, uint8_t width, uint8_t height, uint16_t value, uint16_t valueMin, uint16_t valueMax, uint32_t insideColor, uint32_t outsideColor, SPRITECONSTRUCTOR &refLCD)
 {
     const uint8_t spacing = 2;
     if (value < valueMin)
@@ -272,16 +294,74 @@ void lcdBargraphVertical(uint8_t origin_x, uint8_t origin_y, uint8_t width, uint
     refLCD.fillRect(box_origin_x, box_origin_y, box_width, box_height, color24to16(insideColor));
 }
 
-void drawBar(uint16_t x, uint16_t y, uint16_t w, uint16_t h, uint8_t percent, uint16_t frameColor, uint16_t barColor, LCDCONSTRUCTOR &refLCD)
+// void drawBar(uint16_t x, uint16_t y, uint16_t w, uint16_t h, uint8_t percent, uint16_t frameColor, uint16_t barColor, LCDCONSTRUCTOR &refLCD)
+// {
+//     if (true) //percent == 0)
+//     {
+//         refLCD.fillRoundRect(x, y, w, h, 3, TFT_BLACK);
+//     }
+//     uint8_t margin = 2;
+//     uint16_t barHeight = h - 2 * margin;
+//     uint16_t barWidth = w - 2 * margin;
+//     refLCD.drawRoundRect(x, y, w, h, 3, frameColor);
+//     refLCD.fillRect(x + margin, y + margin, barWidth * percent / 100.0, barHeight, barColor);
+// }
+
+void drawBar(uint16_t x, uint16_t y, uint16_t w, uint16_t h, uint32_t valueMin, uint32_t valueMax, uint32_t value, uint16_t frameColor, uint16_t barColor, SPRITECONSTRUCTOR &refLCD)
 {
-    if (true) //percent == 0)
+    if (value < valueMin)
     {
-        refLCD.fillRoundRect(x, y, w, h, 3, TFT_BLACK);
+        value = valueMin;
     }
+    if (value > valueMax)
+    {
+        value = valueMax;
+    }
+
     uint8_t margin = 2;
     uint16_t barHeight = h - 2 * margin;
-    uint16_t barWidth = w - 2 * margin;
-    refLCD.drawRoundRect(x, y, w, h, 3, frameColor);
-    refLCD.fillRect(x + margin, y + margin, barWidth * percent / 100.0, barHeight, barColor);
-    
+    uint16_t barMaxWidth = w - 2 * margin;
+    uint16_t barWidth = map(value, valueMin, valueMax, 0, barMaxWidth); //barMaxWidth * value / 100.0;
+
+    refLCD.drawRoundRect(x, y, w, h, 3, frameColor); //frame
+
+    refLCD.fillRect(x + margin, y + margin, barWidth, barHeight, barColor); // colored inside
+
+    refLCD.fillRect(x + margin + barWidth, y + margin, barMaxWidth - barWidth, barHeight, TFT_BLACK); // inside bar,  between actual value and max
+}
+
+void drawBarUnit(uint16_t x, uint16_t y, uint16_t w, uint16_t h, uint32_t valueMin, uint32_t valueMax, uint32_t value, uint16_t frameColor, uint16_t barColor, char *unit, SPRITECONSTRUCTOR &refLCD)
+{
+    if (value < valueMin)
+    {
+        value = valueMin;
+    }
+    if (value > valueMax)
+    {
+        value = valueMax;
+    }
+    const uint16_t tw = 48;    //half of text width
+    const uint16_t th = 8;     // half of text height
+    const uint16_t border = 1; //black part of text
+    const uint8_t font = 2;
+
+    char tbuff[8];
+
+    sprintf(tbuff, "%4d", value);
+    strcat(tbuff, unit);
+
+    drawBar(x, y, w, h, valueMin, valueMax, value, frameColor, color24to16(getPixelColorHsv(mapHue(value, valueMin, valueMax), 255, 255)), bar); //draw only bar
+    //refLCD.setTextSize(3);
+    refLCD.setTextColor(TFT_BLACK);
+    refLCD.drawString(tbuff, x + w / 2 - border - tw, y + h / 2 + border - th, font); //black border, drawing same text offseted by 'border' all the way round
+    refLCD.drawString(tbuff, x + w / 2 - border - tw, y + h / 2 - border - th, font);
+    refLCD.drawString(tbuff, x + w / 2 + border - tw, y + h / 2 - border - th, font);
+    refLCD.drawString(tbuff, x + w / 2 + border - tw, y + h / 2 - border - th, font);
+    refLCD.drawString(tbuff, x + w / 2 + border - tw, y + h / 2 + border - th, font);
+    refLCD.drawString(tbuff, x + w / 2 + border - tw, y + h / 2 + border - th, font);
+    refLCD.drawString(tbuff, x + w / 2 + border - tw, y + h / 2 + border - th, font);
+    refLCD.drawString(tbuff, x + w / 2 - border - tw, y + h / 2 + border - th, font);
+
+    refLCD.setTextColor(TFT_WHITE);
+    refLCD.drawString(tbuff, x + w / 2 - tw, y + h / 2 - th, font); //finally, the white text
 }

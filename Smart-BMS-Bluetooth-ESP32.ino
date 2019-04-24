@@ -33,15 +33,15 @@ known bugs:
 //#include <U8g2lib.h>
 #include <Wire.h>
 
-#include <WiFi.h>
-#include <WiFiClient.h>
-#include <WebServer.h>
-#include <Update.h>
-#include "webpages.h"
+// #include <WiFi.h>
+// #include <WiFiClient.h>
+// #include <WebServer.h>
+// #include <Update.h>
+// #include "webpages.h"
 
 HardwareSerial commSerial(0);
 HardwareSerial bmsSerial(1);
-WebServer server(80);
+//WebServer server(80);
 
 //---- global variables ----
 
@@ -71,14 +71,14 @@ void setup()
 	//	stripStartup();
 	//	oled_startup();
 	lcdStartup();
-	newtworkStartup();
+	// newtworkStartup();
 	bleStartup();
 }
 //---------------------main loop------------------
 void loop()
 {
 	bleRequestData();
-	server.handleClient();
+	//server.handleClient();
 	if (newPacketReceived == true)
 	{
 		showInfoLcd;

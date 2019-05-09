@@ -62,7 +62,7 @@ struct packEepromStruct
 #define STRINGBUFFERSIZE 300
 char stringBuffer[STRINGBUFFERSIZE];
 
-const int32_t c_cellNominalVoltage = 3700;
+const int32_t c_cellNominalVoltage = 3700; //mV
 
 const uint16_t c_cellAbsMin = 3000;
 const uint16_t c_cellAbsMax = 4200;

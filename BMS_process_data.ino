@@ -168,7 +168,6 @@ bool bmsProcessPacket(byte *packet)
     {
         // Process basic info
         result = processBasicInfo(&packBasicInfo, data, dataLen);
-        //showBasicInfo();
         newPacketReceived = true;
         break;
     }
@@ -176,7 +175,6 @@ bool bmsProcessPacket(byte *packet)
     case cCellInfo4:
     {
         result = processCellInfo(&packCellInfo, data, dataLen);
-        //showCellInfo();
         newPacketReceived = true;
         break;
     }

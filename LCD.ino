@@ -180,13 +180,15 @@ void showInfoLcd()
 void lcdStartup()
 {
     tft.init();
+    tft.setRotation(3);
     tft.setTextWrap(false);
     tft.fillScreen(TFT_BLACK); // CLEAR
 
-    tft.setRotation(0); //
+    
     tft.setCursor(3, 5);
     tft.setTextColor(TFT_WHITE);
     tft.println("starting ebike");
+  
 }
 
 void lcdDisconnect()

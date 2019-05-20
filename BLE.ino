@@ -100,7 +100,8 @@ void bleRequestData()
     }
     else if (doScan)
     {
-        BLEDevice::getScan()->start(0); // this is just example to start scan after disconnect, most likely there is better way to do it in arduino
+        BLEDevice::getScan()->start(4); // this is just example to start scan after disconnect, most likely there is better way to do it in arduino
+        //pBLEScan->start(5, true); TODO
     }
 #endif
 

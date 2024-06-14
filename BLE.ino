@@ -179,7 +179,7 @@ bool connectToServer()
     // Read the value of the characteristic.
     if (pRemoteCharacteristic->canRead())
     {
-        std::string value = pRemoteCharacteristic->readValue();
+        String value = pRemoteCharacteristic->readValue(); // geändert wegen Fehlermeldung "conversion from 'String' to non-scalar type 'std::string' {aka 'std::__cxx11::basic_string<char>'} requested"
         commSerial.print("The characteristic value was: ");
         commSerial.println(value.c_str());
     }
@@ -188,6 +188,7 @@ bool connectToServer()
         pRemoteCharacteristic->registerForNotify(notifyCallback);
 
     BLE_client_connected = true;
+    return true;  // geändert wegen Warnmeldung Rückkehr ohne Wert non void
 }
 
 void sendCommand(uint8_t *data, uint32_t dataLen)

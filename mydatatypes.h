@@ -21,7 +21,7 @@ typedef struct
 	uint16_t Volts; // unit 1mV
 	int32_t Amps;   // unit 1mA
 	int32_t Watts;   // unit 1W
-	uint16_t CapacityRemainAh;
+	uint32_t CapacityRemainAh;  
 	uint8_t CapacityRemainPercent; //unit 1%
 	uint32_t CapacityRemainWh; 	//unit Wh
 	uint16_t Temp1;				   //unit 0.1C

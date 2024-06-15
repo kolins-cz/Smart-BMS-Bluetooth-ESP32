@@ -1,3 +1,10 @@
+## Announcement
+
+This project is no longer actively maintained. I will not be able to provide support for any issues, bugs or feature requests. However, I will still be accepting pull requests. If you wish to contribute to the project, you're welcome to fork the repository and make any changes you see fit.
+
+For users looking to communicate with BMS, a good starting point would be [this project](https://github.com/syssi/esphome-jbd-bms).
+
+
 # Smart-BMS-Bluetooth-ESP32
 Program to read out and display data from xiaoxiang Smart BMS over Bluetooth Low Energy  
 https://www.lithiumbatterypcb.com/  

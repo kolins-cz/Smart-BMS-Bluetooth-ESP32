@@ -55,8 +55,7 @@ bool processBasicInfo(packBasicInfoStruct *output, byte *data, unsigned int data
     output->Amps = ((int32_t)two_ints_into16(data[2], data[3])) * 10;   // Resolution 10 mA -> convert to miliamps
 
     output->Watts = output->Volts * output->Amps / 1000000; // W
-
-    output->CapacityRemainAh = ((uint16_t)two_ints_into16(data[4], data[5])) * 10;
+    output->CapacityRemainAh = ((uint32_t)two_ints_into16(data[4], data[5])) * 10;// auf32bit erweitert wege Überlauf
     output->CapacityRemainPercent = ((uint8_t)data[19]);
 
     output->CapacityRemainWh = (output->CapacityRemainAh * c_cellNominalVoltage) / 1000000 * packCellInfo.NumOfCells;

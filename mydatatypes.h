@@ -29,6 +29,11 @@ typedef struct
 	uint16_t BalanceCodeLow;
 	uint16_t BalanceCodeHigh;
 	uint8_t MosfetStatus;
+	uint8_t Humidity = ((byte)data[27]); // unit percent
+	uint16_t AlarmStatus = (two_ints_into16(data[28], data[29])); // not used normally
+	uint32_t FullChargeCapacity = (two_ints_into16(data[30], data[31])) * 10;
+	uint32_t RemainingCapacity = ((uint32_t)two_ints_into16(data[32], data[33])) * 10;
+	uint32_t BalanceCurrent = (two_ints_into16(data[34], data[35])); // Resolution 1 mA 
 	
 } packBasicInfoStruct;
 

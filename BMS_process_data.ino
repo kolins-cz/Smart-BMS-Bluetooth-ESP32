@@ -45,11 +45,19 @@ bool isPacketValid(byte *packet) //check if packet is valid
 bool processBasicInfo(packBasicInfoStruct *output, byte *data, unsigned int dataLen)
 {
     TRACE;
+bool newVer = false;
     // Expected data len
-    if (dataLen != 0x1B)
-    {
-        return false;
-    }
+switch(dataLen ) {
+	case 0x1B: // printf("Alter BMS-Typ\n");
+               newVer = false; 
+               break;
+	case 0x24: // printf("Neuer BMS-Typ\n");
+               newVer = true; 
+               break;
+	default: printf("falscher Typ\n");  
+             return false;
+}
+
 
     output->Volts = ((uint32_t)two_ints_into16(data[0], data[1])) * 10; // Resolution 10 mV -> convert to milivolts   eg 4895 > 48950mV
     output->Amps = ((int32_t)two_ints_into16(data[2], data[3])) * 10;   // Resolution 10 mA -> convert to miliamps
@@ -65,7 +73,14 @@ bool processBasicInfo(packBasicInfoStruct *output, byte *data, unsigned int data
     output->BalanceCodeLow = (two_ints_into16(data[12], data[13]));
     output->BalanceCodeHigh = (two_ints_into16(data[14], data[15]));
     output->MosfetStatus = ((byte)data[20]);
-
+    if (newVer == true)
+      {
+        output->Humidity = ((byte)data[27]);
+        output->AlarmStatus = (two_ints_into16(data[28], data[29]));
+        output->FullChargeCapacity = (two_ints_into16(data[30], data[31])) * 10;
+        output->RemainingCapacity = ((uint32_t)two_ints_into16(data[32], data[33])) * 10;
+        output->BalanceCurrent = (two_ints_into16(data[34], data[35])); // Resolution 1 mA 
+      }
     return true;
 };
 
@@ -234,47 +249,70 @@ bool bmsCollectPacket_uart(byte *packet) //unused function to get packet directl
     return retVal;
 }
 
+
 bool bleCollectPacket(char *data, uint32_t dataSize) // reconstruct packet from BLE incomming data, called by notifyCallback function
 {
-    TRACE;
-    static uint8_t packetstate = 0; //0 - empty, 1 - first half of packet received, 2- second half of packet received
-    static uint8_t packetbuff[40] = {0x0};
-    static uint32_t previousDataSize = 0;
-    bool retVal = false;
-    //hexDump(data,dataSize);
+  TRACE;
+  static uint8_t packetstate = 0; //0 - empty, 1 - first half of packet received, 2- second half of packet received, 3 last packet
+  static uint8_t packetbuff[100] = {0x0};
+  static uint32_t previousDataSize = 0;
 
-    if (data[0] == 0xdd && packetstate == 0) // probably got 1st half of packet
+  static uint32_t newDataSize = 0;
+  bool retVal = false;
+//  hexDump(data, dataSize);
+
+  if (data[0] == 0xdd && packetstate == 0) // probably get the 1st part of the package
+  {
+    packetstate = 1;
+    previousDataSize = dataSize;
+
+    for (uint8_t i = 0; i < dataSize; i++)
     {
-        packetstate = 1;
-        previousDataSize = dataSize;
-        for (uint8_t i = 0; i < dataSize; i++)
-        {
-            packetbuff[i] = data[i];
-        }
-        retVal = false;
+      packetbuff[i] = data[i];
     }
+    retVal = false;
+  }
 
-    if (data[dataSize - 1] == 0x77 && packetstate == 1) //probably got 2nd half of the packet
+  if (data[dataSize - 1] == 0x77 && packetstate >= 1) // probably got last packet
+  {
+    packetstate = 3;
+
+    for (uint8_t i = 0; i < dataSize; i++)
     {
-        packetstate = 2;
-        for (uint8_t i = 0; i < dataSize; i++)
-        {
-            packetbuff[i + previousDataSize] = data[i];
-        }
-        retVal = false;
+      packetbuff[i + previousDataSize] = data[i];
     }
-
-    if (packetstate == 2) //got full packet
+    retVal = false;
+  }
+  else
+  {
+    if (data[0] != 0xDD ) // probably get a next part of the package
     {
-        uint8_t packet[dataSize + previousDataSize];
-        memcpy(packet, packetbuff, dataSize + previousDataSize);
 
-        bmsProcessPacket(packet); //pass pointer to retrieved packet to processing function
-        packetstate = 0;
-        retVal = true;
+      packetstate = 2; 
+
+      newDataSize = previousDataSize;
+      for (uint8_t i = 0; i < previousDataSize; i++)
+      {
+        packetbuff[i + previousDataSize] = data[i];
+      }
+      previousDataSize = newDataSize + dataSize ;
+      retVal = false;
     }
-    return retVal;
+  }
+
+  if (packetstate == 3) //got full packet
+  {
+    uint8_t packet[dataSize + previousDataSize];
+    memcpy(packet, packetbuff, dataSize + previousDataSize);
+    bmsProcessPacket(packet); //pass pointer to retrieved packet to processing function
+    packetstate = 0;
+    newDataSize = 0;
+    previousDataSize = 0;
+    retVal = true;
+  }
+  return retVal;
 }
+
 void bmsGetInfo3()
 {
     TRACE;

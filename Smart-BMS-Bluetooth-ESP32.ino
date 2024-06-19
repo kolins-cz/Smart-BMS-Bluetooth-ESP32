@@ -19,7 +19,8 @@
   -if BLE server is not available during startup, program hangs
   -reconnection sort of works, sometimes ESP reboots
 */
-
+#define  eSPI 1
+//#define oled 1
 //#define TRACE commSerial.println(__FUNCTION__)
 #define TRACE
 #include <Arduino.h>
@@ -29,6 +30,9 @@
 #include <SPI.h>
 #include "Adafruit_GFX.h"
 #include "Adafruit_ILI9341.h"
+#ifdef eSPI
+#include "TFT_eSPI.h"
+#endif
 #include <XPT2046_Touchscreen.h>
 #include <Fonts/FreeSansBold9pt7b.h>
 #include <Wire.h>
@@ -51,11 +55,11 @@ static boolean BLE_client_connected = false;
 static boolean doScan = false;
 
 packBasicInfoStruct packBasicInfo;  //here shall be the latest data got from BMS
-packEepromStruct packEeprom;	      //here shall be the latest data got from BMS
+packEepromStruct packEeprom;        //here shall be the latest data got from BMS
 packCellInfoStruct packCellInfo;    //here shall be the latest data got from BMS
 
-const byte cBasicInfo3 = 3; //type of packet 3= basic info
-const byte cCellInfo4 = 4;  //type of packet 4= individual cell info
+const byte cBasicInfo3 = 3;  //type of packet 3= basic info
+const byte cCellInfo4 = 4;   //type of packet 4= individual cell info
 
 unsigned long previousMillis = 0;
 unsigned long previousMillisl = 0;
@@ -65,8 +69,7 @@ const long interval = 4000;
 bool toggle = false;
 bool newPacketReceived = false;
 int i = 0;
-void setup()
-{
+void setup() {
 
   commSerial.begin(115200, SERIAL_8N1, 3, 1);
   bmsSerial.begin(9600, SERIAL_8N1, 21, 22);
@@ -81,19 +84,18 @@ void setup()
   lcdclear();
   showInfoLcd();
   lcdwarte();
-//  linearMeter(99, 10, 310, 5, 10, 1, 30, 5);
-//  for (int wi = 0; wi <= 100; wi = wi + 5) {
-//    kreis(wi,120, 90,80,80);
-//   delay(500);
-//  }
+  //  linearMeter(99, 10, 310, 5, 10, 1, 30, 5);
+  //  for (int wi = 0; wi <= 100; wi = wi + 5) {
+  //    kreis(wi,120, 90,80,80);
+  //   delay(500);
+  //  }
 }
 //---------------------main loop------------------
-void loop()
-{
+void loop() {
   //server.handleClient();
   bleRequestData();
 
-/*
+  /*
   if (newPacketReceived == true)
   {
     showInfoLcd();

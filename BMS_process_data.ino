@@ -45,42 +45,47 @@ bool isPacketValid(byte *packet) //check if packet is valid
 bool processBasicInfo(packBasicInfoStruct *output, byte *data, unsigned int dataLen)
 {
     TRACE;
-bool newVer = false;
-    // Expected data len
-switch(dataLen ) {
-	case 0x1B: // printf("Alter BMS-Typ\n");
-               newVer = false; 
-               break;
-	case 0x24: // printf("Neuer BMS-Typ\n");
-               newVer = true; 
-               break;
-	default: printf("falscher Typ\n");  
-             return false;
-}
-
-
     output->Volts = ((uint32_t)two_ints_into16(data[0], data[1])) * 10; // Resolution 10 mV -> convert to milivolts   eg 4895 > 48950mV
     output->Amps = ((int32_t)two_ints_into16(data[2], data[3])) * 10;   // Resolution 10 mA -> convert to miliamps
 
     output->Watts = output->Volts * output->Amps / 1000000; // W
     output->CapacityRemainAh = ((uint32_t)two_ints_into16(data[4], data[5])) * 10;// auf32bit erweitert wege Überlauf
-    output->CapacityRemainPercent = ((uint8_t)data[19]);
 
     output->CapacityRemainWh = (output->CapacityRemainAh * c_cellNominalVoltage) / 1000000 * packCellInfo.NumOfCells;
 
-    output->Temp1 = (((uint16_t)two_ints_into16(data[23], data[24])) - 2731);
-    output->Temp2 = (((uint16_t)two_ints_into16(data[25], data[26])) - 2731);
     output->BalanceCodeLow = (two_ints_into16(data[12], data[13]));
     output->BalanceCodeHigh = (two_ints_into16(data[14], data[15]));
+    output->CapacityRemainPercent = ((uint8_t)data[19]);
     output->MosfetStatus = ((byte)data[20]);
-    if (newVer == true)
-      {
-        output->Humidity = ((byte)data[27]);
-        output->AlarmStatus = (two_ints_into16(data[28], data[29]));
-        output->FullChargeCapacity = (two_ints_into16(data[30], data[31])) * 10;
-        output->RemainingCapacity = ((uint32_t)two_ints_into16(data[32], data[33])) * 10;
-        output->BalanceCurrent = (two_ints_into16(data[34], data[35])); // Resolution 1 mA 
-      }
+    uint8_t tempCount = ((byte)data[22]);
+    switch (tempCount)
+    {
+    case 0:
+        output->Temp1 = 0;
+        output->Temp2 = 0;
+        break;
+    case 1:
+        output->Temp1 = (((uint16_t)two_ints_into16(data[23], data[24])) - 2731);
+        output->Temp2 = 0;
+        break;
+    case 2:
+        output->Temp1 = (((uint16_t)two_ints_into16(data[23], data[24])) - 2731);
+        output->Temp2 = (((uint16_t)two_ints_into16(data[24], data[26])) - 2731);
+        break;
+    default:
+        // We do not support more than 2 temperature senors
+        break;
+    }
+
+    uint8_t offset = tempCount * 2; // Each temperature sensor needs 2 bytes, so everything after this is offset
+    if (dataLen == 32 + offset)     // New BMS Firmware with more parameters
+    {
+        output->Humidity = ((byte)data[23 + offset]);
+        output->AlarmStatus = (two_ints_into16(data[24 + offset], data[25 + offset]));
+        output->FullChargeCapacity = (two_ints_into16(data[26 + offset], data[27 + offset])) * 10;
+        output->RemainingCapacity = ((uint32_t)two_ints_into16(data[28 + offset], data[29 + offset])) * 10;
+        output->BalanceCurrent = (two_ints_into16(data[30 + offset], data[31 + offset])); // Resolution 1 mA
+    }
     return true;
 };
 
@@ -254,63 +259,63 @@ bool bleCollectPacket(char *data, uint32_t dataSize) // reconstruct packet from 
 {
   TRACE;
   static uint8_t packetstate = 0; //0 - empty, 1 - first half of packet received, 2- second half of packet received, 3 last packet
-  static uint8_t packetbuff[100] = {0x0};
-  static uint32_t previousDataSize = 0;
+    static uint8_t packetbuff[100] = {0x0};
+    static uint32_t previousDataSize = 0;
 
-  static uint32_t newDataSize = 0;
-  bool retVal = false;
-//  hexDump(data, dataSize);
+    static uint32_t newDataSize = 0;
+    bool retVal = false;
+    //  hexDump(data, dataSize);
 
-  if (data[0] == 0xdd && packetstate == 0) // probably get the 1st part of the package
-  {
-    packetstate = 1;
-    previousDataSize = dataSize;
-
-    for (uint8_t i = 0; i < dataSize; i++)
+    if (data[0] == 0xdd && packetstate == 0) // probably get the 1st part of the package
     {
-      packetbuff[i] = data[i];
+        packetstate = 1;
+        previousDataSize = dataSize;
+
+        for (uint8_t i = 0; i < dataSize; i++)
+        {
+            packetbuff[i] = data[i];
+        }
+        retVal = false;
     }
-    retVal = false;
-  }
 
-  if (data[dataSize - 1] == 0x77 && packetstate >= 1) // probably got last packet
-  {
-    packetstate = 3;
-
-    for (uint8_t i = 0; i < dataSize; i++)
+    if (data[dataSize - 1] == 0x77 && packetstate >= 1) // probably got last packet
     {
-      packetbuff[i + previousDataSize] = data[i];
+        packetstate = 3;
+
+        for (uint8_t i = 0; i < dataSize; i++)
+        {
+            packetbuff[i + previousDataSize] = data[i];
+        }
+        retVal = false;
     }
-    retVal = false;
-  }
-  else
-  {
+    else
+    {
     if (data[0] != 0xDD ) // probably get a next part of the package
-    {
+        {
 
-      packetstate = 2; 
+            packetstate = 2;
 
-      newDataSize = previousDataSize;
-      for (uint8_t i = 0; i < previousDataSize; i++)
-      {
-        packetbuff[i + previousDataSize] = data[i];
-      }
+            newDataSize = previousDataSize;
+            for (uint8_t i = 0; i < previousDataSize; i++)
+            {
+                packetbuff[i + previousDataSize] = data[i];
+            }
       previousDataSize = newDataSize + dataSize ;
-      retVal = false;
+            retVal = false;
+        }
     }
-  }
 
   if (packetstate == 3) //got full packet
-  {
-    uint8_t packet[dataSize + previousDataSize];
-    memcpy(packet, packetbuff, dataSize + previousDataSize);
+    {
+        uint8_t packet[dataSize + previousDataSize];
+        memcpy(packet, packetbuff, dataSize + previousDataSize);
     bmsProcessPacket(packet); //pass pointer to retrieved packet to processing function
-    packetstate = 0;
-    newDataSize = 0;
-    previousDataSize = 0;
-    retVal = true;
-  }
-  return retVal;
+        packetstate = 0;
+        newDataSize = 0;
+        previousDataSize = 0;
+        retVal = true;
+    }
+    return retVal;
 }
 
 void bmsGetInfo3()
